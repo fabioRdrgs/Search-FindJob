@@ -1,3 +1,22 @@
+<?php
+if(!isset($_SESSION))
+{
+session_start();
+}
+require_once './php/error.inc.php';
+require_once "./php/user_func.inc.php";
+if(!is_null($_GET['error']))
+SetError($_GET['error']);
+$_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
+if(isset($_POST['login']))
+if(!ConnectUser($email,$password))
+	SetError(1);
+	else
+	header('location: index.php');
+
+	if(isset($_GET['error']))
+	SetError(2);
+?>
 <!doctype html>
 <html class="no-js" lang="en">
     <head>
@@ -18,38 +37,6 @@
 	
     <body>
 	
-<!-- Navigation Start  -->
-<nav class="navbar navbar-default navbar-sticky bootsnav">
-
-<div class="container">      
-	<!-- Start Header Navigation -->
-	<div class="navbar-header">
-		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
-			<i class="fa fa-bars"></i>
-		</button>
-		<a class="navbar-brand" href="index.html"><img src="img/logo.png" class="logo" alt=""></a>
-	</div>
-	<!-- End Header Navigation -->
-
-	<!-- Collect the nav links, forms, and other content for toggling -->
-	<div class="collapse navbar-collapse" id="navbar-menu">
-		<ul class="nav navbar-nav navbar-right" data-in="fadeInDown" data-out="fadeOutUp">
-				<li><a href="index.html">Home</a></li> 
-				<li><a href="login.html">Login</a></li>
-				<li><a href="companies.html">Companies</a></li> 
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Browse</a>
-					<ul class="dropdown-menu animated fadeOutUp" style="display: none; opacity: 1;">
-						<li class="active"><a href="browse-job.html">Browse Jobs</a></li>
-						<li><a href="company-detail.html">Job Detail</a></li>
-						<li><a href="resume.html">Resume Detail</a></li>
-					</ul>
-				</li>
-			</ul>
-	</div><!-- /.navbar-collapse -->
-</div>   
-</nav>
-<!-- Navigation End  -->
 		
 		<!-- login section start -->
 		<section class="login-wrapper">
@@ -57,8 +44,10 @@
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
 					<form method="POST" action="login.php">
 						<img class="img-responsive" alt="logo" src="img/logo.png">
-						<input required type="email" name="email"class="form-control input-lg" oninput="" placeholder="Adresse E-mail">
+						<?php ShowError(); ?>
+						<input required type="email" name="email"class="form-control input-lg" oninput="" placeholder="Adresse E-mail" value="<?=$email?>">
 						<input required type="password" name="password" class="form-control input-lg" placeholder="Mot de Passe">
+						<label><a href="">Mot de passe oublié ?</a></label>
 						<fieldset>
 						<div class="row">							
 							<div class='col'> 
@@ -79,6 +68,5 @@
 		<script src="js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="js/owl.carousel.min.js"></script>
 		<script src="js/bootsnav.js"></script>
-
     </body>
 </html>

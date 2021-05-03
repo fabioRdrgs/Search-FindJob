@@ -1,3 +1,60 @@
+<?php
+if(!isset($_SESSION))
+{
+session_start();
+}
+
+if(!isset($_SESSION['loggedIn']))
+$_SESSION['loggedIn'] = false;
+if(!is_null($_GET['error']))
+SetError($_GET['error']);
+require_once "./php/user_func.inc.php";
+require_once "./php/error.inc.php";
+if(isset($_POST['reset']))
+{
+	unset($_POST['name']);
+	unset($_POST['surname']);
+	unset($_POST['email']);
+	unset($email);
+}
+
+if (isset($_POST['register'])) 
+{
+	if($email == "" || is_null($email) )
+	SetError(6);
+	else
+	if (!VerifyIfMailExists($email)) 
+	{	SetError(0);
+		preg_match("/^([\w\d._\-#])+@([\w\d._\-#]+[.][\w\d._\-#]+)+$/", $email, $matches);
+		if (strlen($email) > 0 && strlen($email) < 45 && strlen($password) > 6 && $email && $matches != null) 
+		{
+			SetError(0);
+			if ($password == $passwordVer) 
+			{
+				SetError(0);
+				if (RegisterUser($email, $password, $type) == false)
+				SetError(5);
+				else{
+					echo "<p style=\"color:red\">Inscription réussie</p>";
+					header('location: index.php');
+				}
+			} else
+			SetError(4);
+		}
+	}
+	else
+	SetError(3);
+
+	unset($password);
+	unset($passwordVer);
+} 
+
+if(isset($_POST['password']) && isset($_POST['passwordVerify']))
+{
+	unset($_POST['password']);
+	unset($_POST['passwordVerify']);
+}
+?>
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -19,38 +76,6 @@
 
 <body>
 
-<!-- Navigation Start  -->
-<nav class="navbar navbar-default navbar-sticky bootsnav">
-
-<div class="container">      
-	<!-- Start Header Navigation -->
-	<div class="navbar-header">
-		<button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
-			<i class="fa fa-bars"></i>
-		</button>
-		<a class="navbar-brand" href="index.html"><img src="img/logo.png" class="logo" alt=""></a>
-	</div>
-	<!-- End Header Navigation -->
-
-	<!-- Collect the nav links, forms, and other content for toggling -->
-	<div class="collapse navbar-collapse" id="navbar-menu">
-		<ul class="nav navbar-nav navbar-right" data-in="fadeInDown" data-out="fadeOutUp">
-				<li><a href="index.html">Home</a></li> 
-				<li><a href="login.html">Login</a></li>
-				<li><a href="companies.html">Companies</a></li> 
-				<li class="dropdown">
-					<a href="#" class="dropdown-toggle" data-toggle="dropdown">Browse</a>
-					<ul class="dropdown-menu animated fadeOutUp" style="display: none; opacity: 1;">
-						<li class="active"><a href="browse-job.html">Browse Jobs</a></li>
-						<li><a href="company-detail.html">Job Detail</a></li>
-						<li><a href="resume.html">Resume Detail</a></li>
-					</ul>
-				</li>
-			</ul>
-	</div><!-- /.navbar-collapse -->
-</div>   
-</nav>
-<!-- Navigation End  -->
 
 	<!-- login section start -->
 	<section class="login-wrapper">
@@ -58,11 +83,11 @@
 			<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
 				<form method="POST" action="signup.php">
 					<img class="img-responsive" alt="logo" src="img/logo.png">
-					<input required type="text" id="name" name="name" class="form-control input-lg" placeholder="Prénom" />
-					<input required type="text" id="surname" name="surname" class="form-control input-lg" placeholder="Nom" />
-					<input required type="email" id="email" name="email" class="form-control input-lg" placeholder="Adresse E-mail">
+					<?php ShowError();?>
+					<input required type="email" id="email" name="email" class="form-control input-lg" placeholder="Adresse E-mail" value="<?=$email?>">
 					<input required type="password" id="pswd" name="password" class="form-control input-lg" placeholder="Mot de Passe">
 					<input required type="password" id="pswd2" name="passwordVerify" class="form-control input-lg" placeholder="Confirmez le Mot de Passe">
+					<?php CreateTypeSelect();?>
 					<fieldset>
 						<div class="row">	
 							<div class='col'>  
@@ -86,7 +111,7 @@
 	<script src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/owl.carousel.min.js"></script>
 	<script src="js/bootsnav.js"></script>
-	<script src="js/signup.js"></script>-->
+	<script src="js/signup.js"></script>
 </body>
 
 </html>
