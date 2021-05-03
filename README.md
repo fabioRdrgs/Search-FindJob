@@ -4,9 +4,9 @@ Dans ce GitHub se trouve le code source ainsi que la documentation du projet de 
 - Début : Lundi 5 Mai 2021
 - Fin : Jeudi 20 Mai 2021
 ## Planning
-Le planning Prévisionnel et Réel est disponible au [lien suivant](https://drive.google.com/file/d/1kpOiJs-T1y1YwqYJaNqO0wxXFG-zJ2u_/view?usp=sharing)
+Le planning Prévisionnel et Réel est disponible au [lien suivant](https://drive.google.com/file/d/15MwdvnFOtSHaKd4KEcpWxujnINghqjvM/view?usp=sharing)
 ## Journal de Bord
-Le journal de bord est disponible au [lien suivant](https://drive.google.com/file/d/1r2q9ASn4MUgob4TXqGZI3l7jn3iPitZJ/view?usp=sharing)
+Le journal de bord est disponible au [lien suivant](https://drive.google.com/file/d/1eMS0ELgJgVu9YN5w9_FfjsbdWHs8_sKK/view?usp=sharing)
 ## Projet
 ### Titre Search & Find Job
 ### Description
