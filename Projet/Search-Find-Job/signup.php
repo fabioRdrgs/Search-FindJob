@@ -44,7 +44,6 @@ if (isset($_POST['register']))
 	}
 	else
 	SetError(3);
-
 	unset($password);
 	unset($passwordVer);
 } 
@@ -54,6 +53,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 	unset($_POST['password']);
 	unset($_POST['passwordVerify']);
 }
+
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -104,9 +104,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 		</div>
 	</section>
 	<!-- login section End -->
-
 	<?php include_once './php/footer.inc.html'?>
-
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="js/owl.carousel.min.js"></script>
