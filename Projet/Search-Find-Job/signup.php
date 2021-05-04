@@ -77,7 +77,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 <body>
 
 
-	<!-- login section start -->
+	<!-- Début de section d'inscription -->
 	<section class="login-wrapper">
 		<div class="container">
 			<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
@@ -103,7 +103,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 			</div>
 		</div>
 	</section>
-	<!-- login section End -->
+	<!-- Fin de section de d'inscription -->
 	<?php include_once './php/footer.inc.html'?>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>

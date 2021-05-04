@@ -8,7 +8,7 @@ if(!isset($_SESSION))
 session_start();
 }
 
-if(!isset($_SESSION['loggedIn']))
+if(!isset($_SESSION['user']['loggedIn']))
 ChangeLoginState(false);
 
 //Si on est connecté, accède les tests de d'accès de page correspondant à l'état connecté de l'utilisateur

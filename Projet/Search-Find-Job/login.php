@@ -38,7 +38,7 @@ if(!ConnectUser($email,$password))
     <body>
 	
 		
-		<!-- login section start -->
+		<!-- Début de section de login -->
 		<section class="login-wrapper">
 			<div class="container">
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
@@ -60,7 +60,7 @@ if(!ConnectUser($email,$password))
 				</div>
 			</div>
 		</section>
-		<!-- login section End -->	
+		<!-- Fin de section de login -->	
 		
 		<?php include_once './php/footer.inc.html'?>
 		 
