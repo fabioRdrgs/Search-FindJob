@@ -2,6 +2,9 @@
 require_once './php/annonce_func.inc.php';
 require_once "./php/pageAccess.inc.php";
 require_once './php/error.inc.php';
+require_once './php/nav.inc.php';
+
+SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 $nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
 $dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);

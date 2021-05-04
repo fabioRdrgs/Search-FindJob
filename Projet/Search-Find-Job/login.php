@@ -4,7 +4,11 @@ if(!isset($_SESSION))
 session_start();
 }
 require_once './php/error.inc.php';
-require_once "./php/user_func.inc.php";
+require_once './php/user_func.inc.php';
+require_once './php/nav.inc.php';
+
+SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
+
 //Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page
 if(isset($_GET['error']))
 SetError($_GET['error']);
@@ -42,7 +46,7 @@ if(!ConnectUser($email,$password))
     </head>
 	
     <body>
-	
+	<?php ShowNavBar();?>
 		
 		<!-- Début de section de login -->
 		<section class="login-wrapper">
