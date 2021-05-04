@@ -1,4 +1,6 @@
 <?php
+require_once "./php/user_func.inc.php";
+require_once "./php/error.inc.php";
 if(!isset($_SESSION))
 {
 session_start();
@@ -6,10 +8,10 @@ session_start();
 
 if(!isset($_SESSION['loggedIn']))
 $_SESSION['loggedIn'] = false;
-if(!is_null($_GET['error']))
+
+if(isset($_GET['error']))
 SetError($_GET['error']);
-require_once "./php/user_func.inc.php";
-require_once "./php/error.inc.php";
+
 if(isset($_POST['reset']))
 {
 	unset($_POST['name']);
@@ -17,30 +19,35 @@ if(isset($_POST['reset']))
 	unset($_POST['email']);
 	unset($email);
 }
-
+//Si l'utilisateur appuie sur s'inscrire
 if (isset($_POST['register'])) 
 {
-	if($email == "" || is_null($email) )
+	//Teste que tous les champs sont remplis, sinon affiche une erreur
+	if(empty($email) || empty($password) || empty($passwordVer))
 	SetError(6);
 	else
+	//Teste si l'email existe déjà dans la base de donnée, si oui, affiche une erreur
 	if (!VerifyIfMailExists($email)) 
-	{	SetError(0);
+	{
+		//REGEX testant l'email pour voir si c'est un email valide
 		preg_match("/^([\w\d._\-#])+@([\w\d._\-#]+[.][\w\d._\-#]+)+$/", $email, $matches);
-		if (strlen($email) > 0 && strlen($email) < 45 && strlen($password) > 6 && $email && $matches != null) 
+		//Teste que l'email fournit correspond bien aux normes d'un email typique
+		if (strlen($email) > 0 && strlen($email) < 45 && $email && $matches != null) 
 		{
-			SetError(0);
+			//Teste que les 2 mots de passe rentrés sont les mêmes, sinon affiche une erreur
 			if ($password == $passwordVer) 
 			{
-				SetError(0);
+				//Teste si l'inscription est bien effectuée, sinon affiche une erreur
 				if (RegisterUser($email, $password, $type) == false)
 				SetError(5);
-				else{
-					echo "<p style=\"color:red\">Inscription réussie</p>";
+				else{;
 					header('location: index.php');
 				}
 			} else
 			SetError(4);
 		}
+		else
+		SetError(9);
 	}
 	else
 	SetError(3);
@@ -77,33 +84,39 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 <body>
 
 
-	<!-- login section start -->
+	<!-- Début de section d'inscription -->
 	<section class="login-wrapper">
 		<div class="container">
 			<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
 				<form method="POST" action="signup.php">
 					<img class="img-responsive" alt="logo" src="img/logo.png">
-					<?php ShowError();?>
+					<?php 
+					 //Affiche une div contenant un message d'erreur
+					ShowError();
+					?>
 					<input required type="email" id="email" name="email" class="form-control input-lg" placeholder="Adresse E-mail" value="<?=$email?>">
 					<input required type="password" id="pswd" name="password" class="form-control input-lg" placeholder="Mot de Passe">
 					<input required type="password" id="pswd2" name="passwordVerify" class="form-control input-lg" placeholder="Confirmez le Mot de Passe">
-					<?php CreateTypeSelect();?>
+					<?php 
+					//Affiche un select avec tous les types d'utilisateur actuel
+					CreateTypeSelect();
+					?>
 					<fieldset>
 						<div class="row">	
 							<div class='col'>  
 							<input type="reset" name="reset" id="reset" class="form-control btn btn-primary" value="reset"/>
 							</div>												
 							<div class='col'> 
-							<input type="submit" name="register" id="register" class="form-control btn btn-primary" disabled>
+							<input type="submit" name="register" id="register" class="form-control btn btn-primary" value="s'inscrire" disabled>
 							</div>
 						</div>
-						</fieldset>	
+					</fieldset>	
 
 				</form>
 			</div>
 		</div>
 	</section>
-	<!-- login section End -->
+	<!-- Fin de section de d'inscription -->
 	<?php include_once './php/footer.inc.html'?>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script src="js/bootstrap.min.js"></script>
