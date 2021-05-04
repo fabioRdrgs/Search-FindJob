@@ -37,14 +37,10 @@ function ShowError()
                 $message = "";
                 break;
         }
-    
-        echo
-        "<div class=\"alert alert-danger\" role=\"alert\">
-    " . $message . "
-    </div>";
+    $message = "<div class=\"alert alert-danger\" role=\"alert\">" . $message . "</div>";
     }
+    echo $message;
 }
-
 
 function SetError($number)
 {
