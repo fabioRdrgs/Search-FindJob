@@ -68,12 +68,12 @@ function ShowNavBar()
                 break;
                 case "Admin":
                      $navBar .= "<li ";
-                   if(isset($_GET['gestion']) && $_GET['gestion'] == "utilisateurs") $navBar .=SetActivePage("administration") . ">
-                                <a href=\"annonces.php\">Annonces</a>
+                   if(isset($_GET['gestion']) && $_GET['gestion'] == "utilisateurs") $navBar .=SetActivePage("administration");  $navBar .= ">
+                                <a href=\"administration.php?gestion=utilisateurs\">Gérer les utilisateurs</a>
                                 </li>
                                 <li ";
-                    if(isset($_GET['gestion']) && $_GET['gestion'] == "motscles") $navBar .= SetActivePage("administration") . ">
-                                <a href=\"wishlist.php\">Ma Wishlist</a>
+                    if(isset($_GET['gestion']) && $_GET['gestion'] == "motscles") $navBar .= SetActivePage("administration"); $navBar .= ">
+                                <a href=\"administration.php?gestion=motscles\">Gérer les mots clés</a>
                                 </li>";
                     break;
         }

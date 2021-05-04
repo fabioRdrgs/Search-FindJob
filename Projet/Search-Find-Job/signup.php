@@ -10,7 +10,7 @@ session_start();
 }
 
 if(!isset($_SESSION['loggedIn']))
-$_SESSION['loggedIn'] = false;
+ChangeLoginState(false);
 
 if(isset($_GET['error']))
 SetError($_GET['error']);
