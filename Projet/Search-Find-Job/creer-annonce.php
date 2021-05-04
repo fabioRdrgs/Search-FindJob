@@ -6,7 +6,7 @@ $nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
 $dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);
 $dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
-$keywords = filter_input(INPUT_POST,'keywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+$keywordsPost = filter_input(INPUT_POST,'keywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 
 
 if(!isset($_SESSION))
@@ -151,20 +151,23 @@ if(isset($_POST['register']))
 				<?php ShowError()?>
 					<form method="POST" action="creer-annonce.php" enctype="multipart/form-data">		
 						<label for="nomAnnonce" >Nom de l'annonce</label>									
-                        <input  id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce" value="Test">
+                        <input required id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce" value="<?=$nomAnnonce?>">
 						<label for="description" >Description de votre annonce</label>									
-						<textarea  id="description" name="description" placeholder="Description de votre annonce" class="form-control input-lg">Test2</textarea>
+						<textarea required id="description" name="description" placeholder="Description de votre annonce" class="form-control input-lg"><?=$description?></textarea>
 						<label for="dateDebut" >Date de début de votre annonce</label>									
-						<input  name="dateDebut" id="dateDebut" type="date" class="form-control input-lg">
+						<input required name="dateDebut" id="dateDebut" type="date" class="form-control input-lg" value="<?=$dateDebut?>">
 						<label for="dateFin">Date de fin de votre annonce</label>									
-						<input  name="dateFin" id="dateFin"  type="date" class="form-control input-lg">	
+						<input required name="dateFin" id="dateFin"  type="date" class="form-control input-lg" value="<?=$dateFin?>">	
 						<label for="keywords" >Les tags de votre annonce (Veuillez en sélectionner 1 à plusieurs)</label>									
-						<select style="width:100%; height:45%" name="keywords[]" multiple  id="keywords">
+						<select required style="width:100%; height:45%" name="keywords[]" multiple  id="keywords">
 						<?php
 						$keywords = GetKeywords();
 						foreach($keywords as $keyword)
 						{
-							echo"<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+							if(in_array($keyword,$keywordsPost))
+							echo"<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+							else
+							echo"<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
 						}
 						?>
 						</select>
