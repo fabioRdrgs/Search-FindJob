@@ -1,6 +1,9 @@
 <?php
 require_once "./php/user_func.inc.php";
 require_once "./php/error.inc.php";
+require_once './php/nav.inc.php';
+
+SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 if(!isset($_SESSION))
 {
 session_start();
@@ -82,7 +85,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 </head>
 
 <body>
-
+<?php ShowNavBar();?>
 
 	<!-- Début de section d'inscription -->
 	<section class="login-wrapper">
