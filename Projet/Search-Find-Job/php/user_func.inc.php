@@ -120,6 +120,15 @@ function GetUserType()
 {
   if(IsUserLoggedIn())
   return $_SESSION['user']['type'];
+  else
+  return null;
+}
+function GetUserId()
+{
+  if(IsUserLoggedIn())
+  return $_SESSION['user']['id'];
+  else
+  return null;
 }
 function IsUserLoggedIn()
 {

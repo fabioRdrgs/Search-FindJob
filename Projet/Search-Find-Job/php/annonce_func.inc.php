@@ -19,53 +19,65 @@ require_once 'db.inc.php';
  * @param string $logo Peut être vide -> Pas de logo
  * @return bool Si true = Job Created, sinon erreur SQL
  */
-function CreateNewJob($nomEntreprise, $nomPoste, $nombrePlace, $salaireMin, $salaireMax, $adresse, $siteweb, $mail, $apropos, $idUtilisateur, $listeCompetences, $logo)
+function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$file,$type,$idUtilisateur)
 {
   try {
     db()->beginTransaction();
 
-    static $psJob = null;
-    if ($psJob == null)
-      $psJob = db()->prepare("INSERT INTO `Job` (`nomEntreprise`,`nomPoste`,`nombrePlace`,`salaireMin`,`salaireMax`,`adresse`,`siteWeb`,`mail`,`aPropos`,`logo`,`idUtilisateur`)
-                    VALUES (:NOMENTREPRISE,:NOMPOSTE,:NOMBREPLACE,:SALAIREMIN,:SALAIREMAX,:ADRESSE,:SITEWEB,:MAIL,:APROPOS,:LOGO,:IDUTILISATEUR)");
+    static $psAnnonce = null;
+    if ($psAnnonce == null)
+      $psAnnonce = db()->prepare("INSERT INTO `annonces` (`titre`,`description`,`date_debut`,`date_fin`,`media_path`,`media_nom`,`media_type`,`utilisateurs_id`)
+                    VALUES (:TITRE,:DESCRIPTION,:DATEDEBUT,:DATEFIN,:MEDIAPATH,:MEDIANOM,:MEDIATYPE,:UTILISATEURSID)");
+    $psAnnonce->bindParam(':TITRE', $nomAnnonce, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':DESCRIPTION', $description, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':DATEDEBUT', $dateDebut, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':DATEFIN', $dateFin, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':MEDIAPATH', $dir, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':MEDIANOM', $file, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':MEDIATYPE', $type, PDO::PARAM_STR);
+    $psAnnonce->bindParam(':UTILISATEURSID', $idUtilisateur, PDO::PARAM_INT);
+    $psAnnonce->execute();
 
-    if ($listeCompetences != null) {
-      static $psCompetence = null;
-      if ($psCompetence == null)
-        $psCompetence = db()->prepare("INSERT INTO `Job_Competence` (`nomCompetence`,`descriptionCompetence`,`idJob`) VALUES (:NOMCOMPETENCE, :DESCRIPTIONCOMPETENCE,:IDJOB)");
-    }
-    $psJob->bindParam(':NOMENTREPRISE', $nomEntreprise, PDO::PARAM_STR);
-    $psJob->bindParam(':NOMPOSTE', $nomPoste, PDO::PARAM_STR);
-    $psJob->bindParam(':NOMBREPLACE', $nombrePlace, PDO::PARAM_INT);
-    $psJob->bindParam(':SALAIREMIN', $salaireMin, PDO::PARAM_INT);
-    $psJob->bindParam(':SALAIREMAX', $salaireMax, PDO::PARAM_INT);
-    $psJob->bindParam(':ADRESSE', $adresse, PDO::PARAM_STR);
-    $psJob->bindParam(':SITEWEB', $siteweb, PDO::PARAM_STR);
-    $psJob->bindParam(':MAIL', $mail, PDO::PARAM_STR);
-    $psJob->bindParam(':APROPOS', $apropos, PDO::PARAM_STR);
-    $psJob->bindParam(':LOGO', $logo, PDO::PARAM_STR);
-    $psJob->bindParam(':IDUTILISATEUR', $idUtilisateur, PDO::PARAM_INT);
-    $psJob->execute();
+    $annonceId = db()->lastInsertId();
 
-    $jobId = db()->lastInsertId();
+    static $psKeywords = null;
+    if($psKeywords == null)
+     $psKeywords = db()->prepare("INSERT INTO `annonces_has_keywords` (`annonces_id`,`keywords_id`) 
+     VALUES (:ANNONCESID,:KEYWORDSID)");
 
-    if ($listeCompetences != null) {
-      for ($i = 0; $i < count($listeCompetences); $i++) {
-        $psCompetence->bindParam(':NOMCOMPETENCE', $listeCompetences[$i]["competence"], PDO::PARAM_STR);
-        $psCompetence->bindParam(':DESCRIPTIONCOMPETENCE', $listeCompetences[$i]["competenceDesc"], PDO::PARAM_STR);
-        $psCompetence->bindParam(':IDJOB', $jobId, PDO::PARAM_INT);
-        $psCompetence->execute();
-      }
-    }
-
+     foreach($keywords as $keyword)
+     {
+       $psKeywords->bindParam(':ANNONCESID',$annonceId,PDO::PARAM_INT);
+       $psKeywords->bindParam(':KEYWORDSID',$keyword,PDO::PARAM_INT);
+       $psKeywords->execute();
+     }   
     db()->commit();
 
     return true;
   } catch (PDOException $e) {
     db()->rollBack();
-    return $e;
+    return false;
   }
 }
+
+function GetKeywords()
+{
+  static $ps = null;
+  $sql = 'SELECT * FROM `keywords`';
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    if ($ps->execute())
+      $answer = $ps->fetchAll(PDO::FETCH_NUM);
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
 /**
  * Permet de mettre à jour le Job
  *

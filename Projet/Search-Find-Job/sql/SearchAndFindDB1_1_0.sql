@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : mar. 04 mai 2021 à 08:46
+-- Généré le : mar. 04 mai 2021 à 12:54
 -- Version du serveur :  10.3.27-MariaDB-0+deb10u1
 -- Version de PHP : 7.3.27-1~deb10u1
 
@@ -36,9 +36,9 @@ CREATE TABLE `annonces` (
   `date_fin` date NOT NULL,
   `titre` varchar(255) NOT NULL,
   `description` longtext NOT NULL,
+  `media_path` varchar(255) DEFAULT NULL,
   `media_nom` varchar(45) DEFAULT NULL,
   `media_type` enum('png','pdf','jpg','jpeg') DEFAULT NULL,
-  `media_path` varchar(255) DEFAULT NULL,
   `utilisateurs_id` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

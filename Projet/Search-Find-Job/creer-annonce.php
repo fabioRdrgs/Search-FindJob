@@ -1,19 +1,12 @@
 <?php
-require './php/job_func.inc.php';
+require './php/annonce_func.inc.php';
 require_once "./php/pageAccess.inc.php";
-$listeCompetences = Array();
-$nomEntreprise = filter_input(INPUT_POST,'nomEntreprise',FILTER_SANITIZE_STRING);
-$nomPoste = filter_input(INPUT_POST,'nomPoste',FILTER_SANITIZE_STRING);
-$nombrePlace = filter_input(INPUT_POST,'nombrePlace',FILTER_SANITIZE_NUMBER_INT);
-$adresse = filter_input(INPUT_POST,'adresse',FILTER_SANITIZE_STRING);
-$siteweb = filter_input(INPUT_POST,'siteWeb',FILTER_SANITIZE_URL);
-$mail = filter_input(INPUT_POST,'email',FILTER_VALIDATE_EMAIL);
-$apropos = filter_input(INPUT_POST,'aPropos',FILTER_SANITIZE_STRING);
-$salaireMin = filter_input(INPUT_POST,'salaireMin',FILTER_SANITIZE_NUMBER_INT);
-$salaireMax = filter_input(INPUT_POST,'salaireMax',FILTER_SANITIZE_NUMBER_INT);
-
-$competence= filter_input(INPUT_POST,'competence',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
-$competenceDesc = filter_input(INPUT_POST,'competenceDesc',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+require_once './php/error.inc.php';
+$nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
+$description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
+$dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);
+$dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
+$keywords = filter_input(INPUT_POST,'keywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 
 
 if(!isset($_SESSION))
@@ -21,34 +14,80 @@ if(!isset($_SESSION))
 session_start();
 }
 
-if(isset($_POST['supprimerJob']))
-{
-	header('location: /php/deleteJob.php');
-}
 
 $_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
-if(!isset($_SESSION['loggedIn']))
-$_SESSION['loggedIn'] = false;
+if(!IsUserLoggedIn())
+ChangeLoginState(false);
 
 
 if(isset($_POST['register']))
 {
-	if($_FILES["logo"]['error'] == 0)
+
+	if(!is_null($nomAnnonce) && !is_null($description) && !is_null($dateDebut) && !is_null($dateFin) && !is_null($keywords))
 	{
-		for($i = 0; $i < count($competence);$i++)
+			//Si un fichier est fournit (Image ou PDF)
+		if($_FILES["media"]['error'] == 0)
 		{
-			array_push($listeCompetences, ["competence"=>$competence[$i] ,"competenceDesc" =>$competenceDesc[$i]]);
+			//Si le fichier fourni est plus petit que 20Mo
+			if($_FILES["media"]["size"]<=20000000)
+			{
+				$Orgfilename = $_FILES["media"]["name"];
+				$filename = uniqid();
+				$dir = "./tmp/";
+				$type = explode("/",$_FILES["media"]["type"])[1];
+				$file = $filename.'.'.$type;
+
+				if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
+				{		
+					SetError(8); 
+				}
+				else
+				{
+					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());					
+				}
+
+			}
 		}
+		else
+		{
+			$type = null;
+			$dir = null;
+			$filename = null;
+			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());
+		}
+
+		if($createAnnonceResult)
+		{
+			if($_FILES["media"]['error'] == 0)
+			{
+				//Si l'upload de l'image réussi, redirige vers la page mes annonces, sinon affiche une erreur
+				if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type))
+				{  
+					//header('location: annonces.php?idU='.GetUserId());
+				}  
+				else
+					SetError(5);
+			}			
+		}		
+	}
+	else
+	SetError(6);
+	
+
+
+	//Si un fichier est fournit (Image ou PDF)
+	/*if($_FILES["logo"]['error'] == 0)
+	{
 		
 		$Orgfilename = $_FILES["logo"]["name"];
 		$filename = uniqid();
 		$dir = "./tmp/";
-		$ext = explode("/",$_FILES["logo"]["type"])[1];
-		$file = $filename.'.'.$ext;
+		$type = explode("/",$_FILES["logo"]["type"])[1];
+		$file = $filename.'.'.$type;
 
-		if(in_array($ext,["png","bmp","jpg","jpeg","pdf"]))
+		if(in_array($type,["png","bmp","jpg","jpeg","pdf"]))
 		{		
-				$createJoResult = CreateNewJob($nomEntreprise,$nomPoste,$nombrePlace,$salaireMin,$salaireMax,$adresse,$siteweb != null ? $siteweb : "",$mail,$apropos,$_SESSION['user']['idUser'],$listeCompetences,($filename.".".$ext));
+				$createJoResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$tag,$dir,$filename,$type,GetUserId());
 				if($createJoResult)
 				{  
 						echo "Job Crée";
@@ -71,19 +110,8 @@ if(isset($_POST['register']))
 		}
 	}
 	else
-	{
-		
-		if($competence != null)
-		{
-			for($i = 0; $i < count($competence);$i++)
-			{
-				array_push($listeCompetences, ["competence"=>$competence[$i] ,"competenceDesc" =>$competenceDesc[$i]]);
-			}
-		}
-		else
-		$listeCompetences = null;
-		error_log($mail);
-		$createJoResult = CreateNewJob($nomEntreprise,$nomPoste,$nombrePlace,$salaireMin,$salaireMax,$adresse,$siteweb != null ? $siteweb : "",$mail,$apropos,$_SESSION['user']['idUser'],$listeCompetences,"");
+	{		
+		$createJoResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$tag,$dir,$filename,$type,GetUserId());
 				if($createJoResult)
 				{  
 						header('location: browse-job.php?idU='.$_SESSION['user']['idUser']);				
@@ -91,9 +119,8 @@ if(isset($_POST['register']))
 				else
 				echo "Erreur lors de la création du job";	
 	}
-	
+	*/
 }
-
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -115,23 +142,32 @@ if(isset($_POST['register']))
 	
     <body>
 	
-	<?php include "./php/nav.inc.php"; ?>
+	<?php // include "./php/nav.inc.php"; ?>
 		
 		<!-- Début section création d'annonce -->
 		<section class="jobs">
 			<div class="container">
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
-					<form method="POST" action="job-create.php" enctype="multipart/form-data">		
+				<?php ShowError()?>
+					<form method="POST" action="creer-annonce.php" enctype="multipart/form-data">		
 						<label for="nomAnnonce" >Nom de l'annonce</label>									
-                        <input required id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce">
+                        <input  id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce" value="Test">
 						<label for="description" >Description de votre annonce</label>									
-						<textarea required id="description" name="description" placeholder="Description de votre annonce" class="form-control input-lg"></textarea>
+						<textarea  id="description" name="description" placeholder="Description de votre annonce" class="form-control input-lg">Test2</textarea>
 						<label for="dateDebut" >Date de début de votre annonce</label>									
-						<input required name="dateDebut" id="dateDebut" type="date" class="form-control input-lg">
+						<input  name="dateDebut" id="dateDebut" type="date" class="form-control input-lg">
 						<label for="dateFin">Date de fin de votre annonce</label>									
-						<input required name="dateFin" id="dateFin"  type="date" class="form-control input-lg" >	
-						<label for="tags" >Les tags de votre annonce (Veuillez séparer vos tags par une virgule <i>tag1,tag2,tag3, . . . </i>)</label>									
-                        <textarea required id="tags" name="tags" placeholder="Les tags de votre annonce" class="form-control input-lg"></textarea>
+						<input  name="dateFin" id="dateFin"  type="date" class="form-control input-lg">	
+						<label for="keywords" >Les tags de votre annonce (Veuillez en sélectionner 1 à plusieurs)</label>									
+						<select style="width:100%; height:45%" name="keywords[]" multiple  id="keywords">
+						<?php
+						$keywords = GetKeywords();
+						foreach($keywords as $keyword)
+						{
+							echo"<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+						}
+						?>
+						</select>
                         <label for="media" >Média souhaitant être inclu à votre annonce (Image ou un fichier PDF) (Optionnel)</label>
                         <input id="media" name="media" type="file" accept=".png,.jpg,.jpeg,.pdf" class="form-control input-lg" >
 						<fieldset>
