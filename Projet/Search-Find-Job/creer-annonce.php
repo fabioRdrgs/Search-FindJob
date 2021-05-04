@@ -22,7 +22,8 @@ ChangeLoginState(false);
 
 if(isset($_POST['register']))
 {
-	if(!is_null($nomAnnonce) && !is_null($description) && !is_null($dateDebut) && !is_null($dateFin) && !is_null($keywordsPost))
+	//Teste si tous les champs sont remplis, sinon affiche une erreur
+	if(!empty($nomAnnonce) && !empty($description) && !empty($dateDebut) && !empty($dateFin) && isset($keywordsPost))
 	{
 		//Si un fichier est fournit (Image ou PDF)
 		if($_FILES["media"]['error'] == 0)

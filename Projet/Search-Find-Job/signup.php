@@ -23,7 +23,7 @@ if(isset($_POST['reset']))
 if (isset($_POST['register'])) 
 {
 	//Teste que tous les champs sont remplis, sinon affiche une erreur
-	if($email == "" || $password == "" || $passwordVer == "")
+	if(empty($email) || empty($password) || empty($passwordVer))
 	SetError(6);
 	else
 	//Teste si l'email existe déjà dans la base de donnée, si oui, affiche une erreur

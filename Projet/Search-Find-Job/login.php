@@ -13,7 +13,7 @@ $_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
 //Lorsque l'utilisateur appuie sur se connecter
 if(isset($_POST['login']))
 //Teste si tous les champs sont remplis, sinon affiche une erreur
-if(is_null($email) || is_null($password))
+if(empty($email) || empty($password))
 SetError(6);
 else
 //Teste si la connexion avec les données fournies réussie et connecte l'utilisateur avant de le renvoyer à l'accueil
