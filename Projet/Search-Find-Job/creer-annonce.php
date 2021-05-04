@@ -167,7 +167,7 @@ if(isset($_POST['register']))
 							if(in_array($keyword,$keywordsPost))
 							echo"<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
 							else
-							echo"<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+							echo"<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
 						}
 						?>
 						</select>

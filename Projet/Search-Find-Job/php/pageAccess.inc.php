@@ -18,13 +18,18 @@ ChangeLoginState(false);
     // Toujours permettre l'accès à index
     if ($script == 'login'|| $script == "signup")
     {
-    header('location: index.php');
-    die("Vous n'avez pas accès à cette page");
+        header('location: index.php');
+        die("Vous n'avez pas accès à cette page");
     }
     if($script == "administration" && GetUserType() != "Admin")
     {
         header('location: index.php?error=7');
         die("Vous n'avez pas accès à cette page");
+    }
+    if($script == "creer-annonce" && GetUserType() != "Annonceur")
+    {
+        header('location: index.php');
+    die("Vous n'avez pas accès à cette page");
     }
 }
 //Si on n'est pas connecté, accède les tests de d'accès de page correspondant à l'état non connecté de l'utilisateur
