@@ -19,7 +19,7 @@ function ShowError()
                 $message = "Les mots de passes ne sont pas identiques";
                 break;
             case 5:
-                $message = "Une erreur lors de l'upload du média sur le serveur s'est produite, Veuillez contacter un administrateur";
+                $message = "Une erreur s'est produite, Veuillez contacter un administrateur";
                 break;
             case 6:
                 $message = "Veuillez remplir tous les champs";
@@ -29,6 +29,9 @@ function ShowError()
                 break;
             case 8:
                 $message = "Le média fournit n'est pas du bon type";
+                break;
+            case 9:
+                $message ="L'email fournit n'est pas valide";
                 break;
             default:
                 $message = "";

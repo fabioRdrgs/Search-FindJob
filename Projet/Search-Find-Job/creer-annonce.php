@@ -1,5 +1,5 @@
 <?php
-require './php/annonce_func.inc.php';
+require_once './php/annonce_func.inc.php';
 require_once "./php/pageAccess.inc.php";
 require_once './php/error.inc.php';
 $nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
@@ -22,10 +22,9 @@ ChangeLoginState(false);
 
 if(isset($_POST['register']))
 {
-
-	if(!is_null($nomAnnonce) && !is_null($description) && !is_null($dateDebut) && !is_null($dateFin) && !is_null($keywords))
+	if(!is_null($nomAnnonce) && !is_null($description) && !is_null($dateDebut) && !is_null($dateFin) && !is_null($keywordsPost))
 	{
-			//Si un fichier est fournit (Image ou PDF)
+		//Si un fichier est fournit (Image ou PDF)
 		if($_FILES["media"]['error'] == 0)
 		{
 			//Si le fichier fourni est plus petit que 20Mo
@@ -45,7 +44,6 @@ if(isset($_POST['register']))
 				{
 					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());					
 				}
-
 			}
 		}
 		else
@@ -56,7 +54,7 @@ if(isset($_POST['register']))
 			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());
 		}
 
-		if($createAnnonceResult)
+		if(isset($createAnnonceResult) && $createAnnonceResult)
 		{
 			if($_FILES["media"]['error'] == 0)
 			{
@@ -72,54 +70,6 @@ if(isset($_POST['register']))
 	}
 	else
 	SetError(6);
-	
-
-
-	//Si un fichier est fournit (Image ou PDF)
-	/*if($_FILES["logo"]['error'] == 0)
-	{
-		
-		$Orgfilename = $_FILES["logo"]["name"];
-		$filename = uniqid();
-		$dir = "./tmp/";
-		$type = explode("/",$_FILES["logo"]["type"])[1];
-		$file = $filename.'.'.$type;
-
-		if(in_array($type,["png","bmp","jpg","jpeg","pdf"]))
-		{		
-				$createJoResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$tag,$dir,$filename,$type,GetUserId());
-				if($createJoResult)
-				{  
-						echo "Job Crée";
-					if(move_uploaded_file($_FILES["logo"]["tmp_name"],$dir.$file))
-					{  
-						header('location: browse-job.php?idU='.$_SESSION['user']['idUser']);
-					}  
-					else
-						echo "Error lors de l'upload de l'image";
-				}		
-				else
-				{
-					echo $createJoResult;
-					unlink($dir.$file);
-				}     
-		}
-		else
-		{				
-			echo "Veuillez sélectionner des fichiers valides!";
-		}
-	}
-	else
-	{		
-		$createJoResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$tag,$dir,$filename,$type,GetUserId());
-				if($createJoResult)
-				{  
-						header('location: browse-job.php?idU='.$_SESSION['user']['idUser']);				
-				}	
-				else
-				echo "Erreur lors de la création du job";	
-	}
-	*/
 }
 ?>
 <!doctype html>
@@ -164,7 +114,7 @@ if(isset($_POST['register']))
 						$keywords = GetKeywords();
 						foreach($keywords as $keyword)
 						{
-							if(in_array($keyword,$keywordsPost))
+							if(in_array($keyword[0],$keywordsPost))
 							echo"<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
 							else
 							echo"<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";

@@ -5,17 +5,23 @@ session_start();
 }
 require_once './php/error.inc.php';
 require_once "./php/user_func.inc.php";
-if(!is_null($_GET['error']))
+//Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page
+if(isset($_GET['error']))
 SetError($_GET['error']);
+
 $_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
+//Lorsque l'utilisateur appuie sur se connecter
 if(isset($_POST['login']))
+//Teste si tous les champs sont remplis, sinon affiche une erreur
+if(is_null($email) || is_null($password))
+SetError(6);
+else
+//Teste si la connexion avec les données fournies réussie et connecte l'utilisateur avant de le renvoyer à l'accueil
+//Sinon, affiche une erreur
 if(!ConnectUser($email,$password))
 	SetError(1);
 	else
 	header('location: index.php');
-
-	if(isset($_GET['error']))
-	SetError(2);
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -44,14 +50,19 @@ if(!ConnectUser($email,$password))
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
 					<form method="POST" action="login.php">
 						<img class="img-responsive" alt="logo" src="img/logo.png">
-						<?php ShowError(); ?>
+						<?php
+						 //Affiche une div contenant un message d'erreur
+						 ShowError();
+						  ?>
 						<input required type="email" name="email"class="form-control input-lg" oninput="" placeholder="Adresse E-mail" value="<?=$email?>">
 						<input required type="password" name="password" class="form-control input-lg" placeholder="Mot de Passe">
-						<label><a href="">Mot de passe oublié ?</a></label>
 						<fieldset>
-						<div class="row">							
+						<div class="row">	
+							<div class='col'>  
+							<input type="reset" name="reset" id="reset" class="form-control btn btn-primary" value="reset"/>
+							</div>											
 							<div class='col'> 
-							<input type="submit" name="login" id="login" class="form-control btn btn-primary" >
+							<input type="submit" name="login" id="login" class="form-control btn btn-primary" value="se connecter" >
 							</div>
 						</div>
 						</fieldset>	

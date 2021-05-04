@@ -14,7 +14,7 @@ $("input").on('keyup',function(){
         return;
     }
 
-    if(pswd.length > 6)   
+    if(pswd.length > 0)   
     passwordInput.css('background-color',"");
     else
     {
