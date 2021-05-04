@@ -1,3 +1,10 @@
+<?php
+if(!isset($_SESSION))
+session_start();
+require_once './php/error.inc.php';
+if(!is_null($_GET['error']))
+SetError($_GET['error']);
+?>
 <!doctype html>
 <html class="no-js" lang="en">
     <head>
@@ -50,7 +57,8 @@
 			</div>   
 		</nav>
 		<!-- Navigation End  -->
-		
+		<?php 
+		ShowError()?>
 		<!-- Main jumbotron for a primary marketing message or call to action -->
 		<section class="main-banner" style="background:#242c36 url(img/slider-01.jpg) no-repeat">
 			<div class="container">
