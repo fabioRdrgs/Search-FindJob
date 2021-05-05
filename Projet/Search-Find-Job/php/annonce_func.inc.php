@@ -77,7 +77,6 @@ function GetKeywords()
   }
   return $answer;
 }
-
 function ShowSelectKeywords($motsClesSelectPost)
 {
   if(!isset($motsClesSelectPost))

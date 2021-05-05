@@ -46,7 +46,9 @@ if(isset($_POST['register']))
 				}
 				else
 				{
+
 					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());					
+
 				}
 			}
 		}
@@ -56,6 +58,7 @@ if(isset($_POST['register']))
 			$dir = null;
 			$filename = null;
 			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());
+
 		}
 
 		if(isset($createAnnonceResult) && $createAnnonceResult)
@@ -97,7 +100,9 @@ if(isset($_POST['register']))
 	
     <body>
 	
+
 	<?php ShowNavBar(); ?>
+
 		
 		<!-- Début section création d'annonce -->
 		<section class="jobs">
