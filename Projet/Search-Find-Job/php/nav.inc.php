@@ -39,7 +39,11 @@ function ShowNavBar()
                         <li " .
             SetActivePage("signup") . ">
                         <a href=\"signup.php\">S'inscrire</a>
-                        </li>";
+                        </li>
+                        <li " .
+                        SetActivePage("annonces") . ">
+                                    <a href=\"annonces.php\">Annonces</a>
+                                    </li>";
     }
      else 
     {
@@ -76,6 +80,12 @@ function ShowNavBar()
                                 <a href=\"administration.php?gestion=motscles\">Gérer les mots clés</a>
                                 </li>";
                     break;
+                    default:
+                    $navBar .= "<li " .
+                    SetActivePage("annonces") . ">
+                                <a href=\"annonces.php\">Annonces</a>
+                                </li>";
+                                break;
         }
 
 

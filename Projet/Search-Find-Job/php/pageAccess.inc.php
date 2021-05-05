@@ -11,6 +11,11 @@ session_start();
 if(!isset($_SESSION['user']['loggedIn']))
 ChangeLoginState(false);
 
+if($script == "annonce" && !isset($_GET['idA']))
+{
+header('location: index.php');
+        die("Vous n'avez pas accès à cette page");
+}
 //Si on est connecté, accède les tests de d'accès de page correspondant à l'état connecté de l'utilisateur
  if(IsUserLoggedIn())
 {
