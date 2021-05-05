@@ -96,7 +96,7 @@ if(isset($_POST['register']))
 	
     <body>
 	
-	<?php // include "./php/nav.inc.php"; ?>
+	<?php ShowNavBar();?>
 		
 		<!-- Début section création d'annonce -->
 		<section class="jobs">
