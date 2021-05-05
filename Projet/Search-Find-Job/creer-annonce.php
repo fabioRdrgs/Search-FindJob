@@ -9,7 +9,7 @@ $nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
 $dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);
 $dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
-$keywordsPost = filter_input(INPUT_POST,'keywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+$motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 
 
 if(!isset($_SESSION))
@@ -26,7 +26,7 @@ ChangeLoginState(false);
 if(isset($_POST['register']))
 {
 	//Teste si tous les champs sont remplis, sinon affiche une erreur
-	if(!empty($nomAnnonce) && !empty($description) && !empty($dateDebut) && !empty($dateFin) && isset($keywordsPost))
+	if(!empty($nomAnnonce) && !empty($description) && !empty($dateDebut) && !empty($dateFin) && isset($motsClesSelectPost))
 	{
 		//Si un fichier est fournit (Image ou PDF)
 		if($_FILES["media"]['error'] == 0)
@@ -46,7 +46,7 @@ if(isset($_POST['register']))
 				}
 				else
 				{
-					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());					
+					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());					
 				}
 			}
 		}
@@ -55,7 +55,7 @@ if(isset($_POST['register']))
 			$type = null;
 			$dir = null;
 			$filename = null;
-			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());
+			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());
 		}
 
 		if(isset($createAnnonceResult) && $createAnnonceResult)
@@ -87,7 +87,8 @@ if(isset($_POST['register']))
 		<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
         <!-- All Plugin Css --> 
 		<link rel="stylesheet" href="css/plugins.css">
-		
+		<link href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/css/bootstrap-select.min.css" />
 		<!-- Style & Common Css --> 
 		<link rel="stylesheet" href="css/common.css">
         <link rel="stylesheet" href="css/main.css">
@@ -96,7 +97,7 @@ if(isset($_POST['register']))
 	
     <body>
 	
-	<?php // include "./php/nav.inc.php"; ?>
+	<?php ShowNavBar(); ?>
 		
 		<!-- Début section création d'annonce -->
 		<section class="jobs">
@@ -113,18 +114,9 @@ if(isset($_POST['register']))
 						<label for="dateFin">Date de fin de votre annonce</label>									
 						<input required name="dateFin" id="dateFin"  type="date" class="form-control input-lg" value="<?=$dateFin?>">	
 						<label for="keywords" >Les tags de votre annonce (Veuillez en sélectionner 1 à plusieurs)</label>									
-						<select required style="width:100%; height:45%" name="keywords[]" multiple  id="keywords">
 						<?php
-						$keywords = GetKeywords();
-						foreach($keywords as $keyword)
-						{
-							if(in_array($keyword[0],$keywordsPost))
-							echo"<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
-							else
-							echo"<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
-						}
+						ShowSelectKeywords($motsClesSelectPost);
 						?>
-						</select>
                         <label for="media" >Média souhaitant être inclu à votre annonce (Image ou un fichier PDF) (Optionnel)</label>
                         <input id="media" name="media" type="file" accept=".png,.jpg,.jpeg,.pdf" class="form-control input-lg" >
 						<fieldset>
@@ -203,9 +195,9 @@ if(isset($_POST['register']))
 			 <p>&copy;Copyright 2018 Jober Desk | Design By <a href="https://themezhub.com/">ThemezHub</a></p>
 			</div>
 		</footer>
-		 
-		<script type="text/javascript" src="js/jquery.min.js"></script>
-		<script src="js/bootstrap.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+  		<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
 		<script type="text/javascript" src="js/owl.carousel.min.js"></script>
 		<script src="js/bootsnav.js"></script>
 		<script src="./js/create-job.js"></script>
