@@ -46,7 +46,7 @@ if(isset($_POST['register']))
 				}
 				else
 				{
-					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());					
+					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywordsPost,$dir,$filename,$type,GetUserId());					
 				}
 			}
 		}
@@ -55,7 +55,7 @@ if(isset($_POST['register']))
 			$type = null;
 			$dir = null;
 			$filename = null;
-			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type,GetUserId());
+			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywordsPost,$dir,$filename,$type,GetUserId());
 		}
 
 		if(isset($createAnnonceResult) && $createAnnonceResult)
