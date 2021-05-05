@@ -99,7 +99,26 @@ foreach($keywords as $keyword)
   echo $select;
 }
 
-function GetAnnoncesFromSearch($titreAnnonce, $descAnnonce,$motsClesSelect,$limit,$idUtilisateur)
+function GetAnnonceInfo($idAnnonce)
+{
+  static $ps = null;
+  $sql = 'SELECT * FROM `annonces` WHERE id = :IDANNONCE';
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+    if ($ps->execute())
+      $answer = $ps->fetch(PDO::FETCH_NUM);
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
+function GetAnnoncesFromSearchChercheur($titreAnnonce, $descAnnonce,$motsClesSelect,$limit)
 {
   if(is_null($motsClesSelect))
   $countKeywords = 0;
@@ -115,8 +134,57 @@ function GetAnnoncesFromSearch($titreAnnonce, $descAnnonce,$motsClesSelect,$limi
   ON (annonces.id = annonces_has_keywords.annonces_id) 
   WHERE titre LIKE :TITREANNONCE 
   AND description LIKE :DESCANNONCE 
-  AND (:IDUTILISATEUR IS NULL OR utilisateurs_id = :IDUTILISATEUR) 
   AND date_debut <= CURRENT_DATE AND date_fin >= CURRENT_DATE ";
+
+for ($i=0; $i < $countKeywords; $i++) 
+{ 
+  if($i == 0)
+  $sql.= "AND ((:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
+  else
+  $sql.= " OR (:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
+
+  if($i == $countKeywords-1)
+  $sql.=")";
+}
+$sql.="  ORDER BY date_publication ASC LIMIT :LIMIT";
+
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindValue(':TITREANNONCE', "%" . $titreAnnonce . "%", PDO::PARAM_STR);
+    $ps->bindValue(':DESCANNONCE', "%" .$descAnnonce. "%", PDO::PARAM_STR);
+    $ps->bindParam(':LIMIT',$limit,PDO::PARAM_INT);
+    for ($i=0; $i <  $countKeywords; $i++) { 
+      $ps->bindParam(':KEYWORD'.$i, $motsClesSelect[$i], PDO::PARAM_INT); 
+    }
+
+    if ($ps->execute())
+      $answer = $ps->fetchAll(PDO::FETCH_NUM);
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+function GetAnnoncesFromSearchAnnonceur($titreAnnonce, $descAnnonce,$motsClesSelect,$limit,$idUtilisateur)
+{
+  if(is_null($motsClesSelect))
+  $countKeywords = 0;
+  else
+  $countKeywords = count($motsClesSelect);
+
+  static $ps = null;
+
+  //Pour chaque paramètres, s'il est fournit => le teste, sinon, ne le teste pas ({PARAMÈTRE} IS NULL OR [CONDITION] = {PARAMÈTRE})
+  $sql = "SELECT DISTINCT annonces.*
+  FROM annonces 
+  JOIN annonces_has_keywords 
+  ON (annonces.id = annonces_has_keywords.annonces_id) 
+  WHERE titre LIKE :TITREANNONCE 
+  AND description LIKE :DESCANNONCE 
+  AND (:IDUTILISATEUR IS NULL OR utilisateurs_id = :IDUTILISATEUR)";
 
 for ($i=0; $i < $countKeywords; $i++) 
 { 
@@ -152,16 +220,138 @@ $sql.="  ORDER BY date_publication ASC LIMIT :LIMIT";
   return $answer;
 }
 
-
-function ShowAnnonces($idUtilisateur)
+function ShowAnnoncesChercheur($titre,$description,$motsClesSelectPost,$limit)
 {
-  //Si l'on souhaite afficher la vue Annonces "Mes Annonces" ou celle de "Annonces"
-  if(!is_null($idUtilisateur))
-  {
+  $annonces = GetAnnoncesFromSearchChercheur($titre,$description,$motsClesSelectPost,$limit);
+	if($annonces != false)
+	foreach($annonces as $annonce)
+	{
+		$affichageAnnonce = "";
+		$affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
+		$affichageAnnonce .= "	<div class=\"row\">";
+		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
+		$affichageAnnonce .= "			<div class=\"company-content\">";
+		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
+		$affichageAnnonce .= "				<p><span class=\"company-name\">
+											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
+											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
+											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
+		$affichageAnnonce .= "			</div>";
+		$affichageAnnonce .= "		</div>";
+		$affichageAnnonce .= "	</div>";
+		$affichageAnnonce .= "</div></a>";
+		echo $affichageAnnonce; 
+	}
+}
 
+function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$idUtilisateur)
+{
+  $annonces = GetAnnoncesFromSearchAnnonceur($titre,$description,$motsClesSelectPost,$limit,$idUtilisateur);
+	if($annonces != false)
+	foreach($annonces as $annonce)
+	{
+		$affichageAnnonce = "";
+		$affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
+		$affichageAnnonce .= "	<div class=\"row\">";
+		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
+		$affichageAnnonce .= "			<div class=\"company-content\">";
+		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
+		$affichageAnnonce .= "				<p><span class=\"company-name\">
+											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
+											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
+											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
+		$affichageAnnonce .= "			</div>";
+		$affichageAnnonce .= "		</div>";
+		$affichageAnnonce .= "	</div>";
+		$affichageAnnonce .= "</div></a>";
+		echo $affichageAnnonce; 
+	}
+}
+
+function ShowAnnonceInfo($typeUser,$idAnnonce)
+{
+  $annonceInfo = GetAnnonceInfo($idAnnonce);
+  $annonce = "";
+  if($typeUser =="Annonceur")
+  {    
+    $annonce.= "<section class=\"profile-detail\">";
+    $annonce.=    "<div class=\"container\">";
+    $annonce.=      "<div class=\"col-md-12\">";
+    $annonce.=        "<div class=\"row\">";
+    $annonce.=          "<div class=\"basic-information\">";
+    $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
+    $annonce.=              "<div class=\"profile-content\">";
+    $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
+    $annonce.=                "<p>Nombre de followers : </p>";
+    $annonce.=                "<ul class=\"information\">";
+    $annonce.=                "<div class=\"panel panel-default\"><h4>Followers</h4></div>";
+    $annonce.=                "<li><span>Address:</span>Menlo Park, CA</li>";
+    $annonce.=                "<li><span>Website:</span>Google.com</li>";
+    $annonce.=                "<li><span>Employee:</span>50,000 - 70,000 employer</li>";
+    $annonce.=                "<li><span>Mail:</span>info@google.com</li>";
+    $annonce.=                "<li><span>From:</span>1998</li>";
+    $annonce.=                "</ul>";
+    $annonce.=              "</div>";
+    $annonce.=              "</br>";
+    $annonce.=              "<div class=\"panel panel-default\">";
+    $annonce.=                "<div class=\"panel-heading\">";
+    $annonce.=                  "<i class=\"fa fa-user fa-fw\"></i> Description";
+    $annonce.=                "</div>";                       
+    $annonce.=                "<div  class=\"panel-body\">";
+    $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
+    $annonce.=                "</div>";
+    $annonce.=              "</div>";
+    $annonce.=              "<div class=\"panel panel-default\">";
+    if($annonceInfo[8] == "pdf")
+    {
+      $annonce.= "<embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500\" height=\"375\" type=\"application/pdf\">";
+    }
+    else
+    {
+      $annonce.= "<img src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\">";
+    }
+    $annonce.=              "</div>";
+    $annonce.=            "</div>";
+    $annonce.=          "</div>";
+    $annonce.=        "</div>";
+    $annonce.=      "</div>";
+    $annonce.= "</section>";
   }
   else
   {
-
+    $annonce.= "<section class=\"profile-detail\">";
+    $annonce.=    "<div class=\"container\">";
+    $annonce.=      "<div class=\"col-md-12\">";
+    $annonce.=        "<div class=\"row\">";
+    $annonce.=          "<div class=\"basic-information\">";
+    $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
+    $annonce.=              "<div class=\"profile-content\">";
+    $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
+    $annonce.=              "</div>";
+    $annonce.=              "</br>";
+    $annonce.=              "<div class=\"panel panel-default\">";
+    $annonce.=                "<div class=\"panel-heading\">";
+    $annonce.=                  "<i class=\"fa fa-user fa-fw\"></i> Description";
+    $annonce.=                "</div>";                       
+    $annonce.=                "<div class=\"panel-body\">";
+    $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
+    $annonce.=                "</div>";
+    $annonce.=              "</div>";
+    $annonce.=              "<div class=\"panel panel-default\">";
+    if($annonceInfo[8] == "pdf")
+    {
+      $annonce.= "<embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500\" height=\"375\" type=\"application/pdf\">";
+    }
+    else
+    {
+      $annonce.= "<a href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\"><img style=\" display: block;margin-left: auto;margin-right: auto;\"src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></a>";
+    }
+    $annonce.=              "</div>";
+    $annonce.=            "</div>";
+    $annonce.=          "</div>";
+    $annonce.=        "</div>";
+    $annonce.=      "</div>";
+    $annonce.= "</section>";
   }
+  echo $annonce;
 }

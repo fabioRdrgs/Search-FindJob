@@ -62,11 +62,9 @@ if(isset($_POST['plusAnnonces']))
 		<section class="jobs">
 			<div class="container">
 			
-			<!-- Début Header recherche annonces -->
 				<div class="row heading">
 					<h2>Cherchez votre annonce</h2>
 				</div>
-			<!-- Fin Header recherche annonces -->
 				<!-- Début div recherche -->
 				<div class="row top-pad">
 					<div class="filter">
@@ -105,25 +103,16 @@ if(isset($_POST['plusAnnonces']))
 <?php
 if(isset($_POST['rechercher']))
 {
-	$annonces = GetAnnoncesFromSearch($titre,$description,$motsClesSelectPost,4*$_GET['limit'],null);
-	if($annonces != false)
-	foreach($annonces as $annonce)
+	if(GetUserType() == "Annonceur")
 	{
-		$affichageAnnonce = "";
-		$affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
-		$affichageAnnonce .= "	<div class=\"row\">";
-		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
-		$affichageAnnonce .= "			<div class=\"company-content\">";
-		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
-		$affichageAnnonce .= "				<p><span class=\"company-name\">
-											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
-											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
-											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
-		$affichageAnnonce .= "			</div>";
-		$affichageAnnonce .= "		</div>";
-		$affichageAnnonce .= "	</div>";
-		$affichageAnnonce .= "</div></a>";
-		echo $affichageAnnonce; 
+		if(isset($_GET['idU']))
+		ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,4*$_GET['limit'],$_GET['idU']);
+		else
+		ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,4*$_GET['limit'],null);
+	}
+	else
+	{
+		ShowAnnoncesChercheur($titre,$description,$motsClesSelectPost,4*$_GET['limit']);
 	}
 }
 ?>
