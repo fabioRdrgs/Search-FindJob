@@ -478,7 +478,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=      "</div>";
     $annonce.= "</section>";
   }
-  else
+  else if($typeUser == "Chercheur")
   {
     $annonce.= "<section class=\"profile-detail\">";
     $annonce.=    "<div class=\"container\">";
@@ -499,14 +499,28 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=                "</div>";
     $annonce.=              "</div>";
     $annonce.=              "<div class=\"panel panel-default\">";
-    if($annonceInfo[8] == "pdf")
-    {
-      $annonce.= "<embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500\" height=\"375\" type=\"application/pdf\">";
+    if(!empty($annonceInfo[8]))
+    {  
+      $annonce.= "<table style=\"text-align: center;margin: auto\">";
+      if($annonceInfo[8] == "pdf")
+      {
+        $annonce.= "<tr><td><embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500px\" height=\"600px\" type=\"application/pdf\"></td></tr>
+        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+        </a></td></tr><tr><td><label for=\"download\">Télécharger le PDF</label></td></tr>";
+      }
+      else
+      {
+        $annonce.= "<tr><td><img width=\"500px\" height=\"600px\"  src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></td></tr>
+        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+        </a></td></tr><tr><td><label for=\"download\">Télécharger l'image</label></td></tr>";
+      }
+      $annonce.= "</table>";
     }
     else
-    {
-      $annonce.= "<a href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\"><img style=\" display: block;margin-left: auto;margin-right: auto;\"src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></a>";
-    }
+    $annonce.= "<p>Pas de média disponible</p>";
+   
     $annonce.=              "</div>";
     $annonce.=            "</div>";
     $annonce.=          "</div>";

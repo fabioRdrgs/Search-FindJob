@@ -112,7 +112,7 @@ if(isset($_POST['rechercher']))
 		else
 		ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,4*$_GET['limit'],null);
 	}
-	else
+	else if(GetUserType() == "Chercheur")
 	{
 		ShowAnnoncesChercheur($titre,$description,$motsClesSelectPost,4*$_GET['limit']);
 	}
