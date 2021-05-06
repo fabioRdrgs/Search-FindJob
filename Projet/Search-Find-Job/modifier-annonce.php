@@ -10,21 +10,23 @@ $description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
 $dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);
 $dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
-
-
+$supprimerMediaActuel = filter_input(INPUT_POST,'enleverMedia');
 if(!isset($_SESSION))
 {
 session_start();
 }
-
-
-$_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
 if(!IsUserLoggedIn())
 ChangeLoginState(false);
 
+$_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
+$annonceInfoOld = GetAnnonceInfo($_GET['idA']);
+$motsClesOld = GetKeywordsByIdAnnonce($_GET['idA']);
 
-if(isset($_POST['creer']))
+
+if(isset($_POST['update']))
 {
+	
+	
 	//Teste si tous les champs sont remplis, sinon affiche une erreur
 	if(!empty($nomAnnonce) && !empty($description) && !empty($dateDebut) && !empty($dateFin) && isset($motsClesSelectPost))
 	{
@@ -43,42 +45,78 @@ if(isset($_POST['creer']))
 				if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
 				{		
 					SetError(8); 
-				}
-				else
-				{
-					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());					
-				}
+				}				
 			}
 		}
 		else
 		{
-			$type = null;
 			$dir = null;
 			$filename = null;
-
-			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());
-
+			$type = null;
 		}
 
-		if(isset($createAnnonceResult) && $createAnnonceResult)
-		{
-			if($_FILES["media"]['error'] == 0)
+			$motsClesChange = false;
+			$motsClesIdArrayOld= [];
+			foreach ($motsClesOld as $motsCleOld) 
 			{
-				//Si l'upload de l'image réussi, redirige vers la page mes annonces, sinon affiche une erreur
-				if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type))
-				{  
-					header('location: annonces.php?idU='.GetUserId());
-				}  
-				else
-					SetError(5);
+				array_push($motsClesIdArrayOld,$motsCleOld[0]);
 			}
-			else
-			header('location: annonces.php?idU='.GetUserId());
-		}		
+			for ($i=0; $i < count($motsClesIdArrayOld); $i++) 
+			{ 
+				if(!in_array($motsClesSelectPost[$i],$motsClesIdArrayOld))
+				$motsClesChange = true;
+			}
+
+			if(empty(GetError()))
+			{
+				if($supprimerMediaActuel ||$nomAnnonce != $annonceInfoOld[4] || $description != $annonceInfoOld[5] || $dateDebut != $annonceInfoOld[1] || $dateFin != $annonceInfoOld[2] || $motsClesChange || !empty($dir) || !empty($filename) || !empty($type))
+				{
+					if(!$motsClesChange)
+					$motsClesSelectPost = null;
+
+					if(!isset($supprimerMediaActuel))					
+						$supprimerMediaActuel = null;					
+					
+					$updateAnnonceResult = UpdateAnnonce($_GET['idA'],$nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,$supprimerMediaActuel);					
+					if($updateAnnonceResult && !empty($dir) && !empty($filename) && !empty($type))
+					{
+						if(!is_null($supprimerMediaActuel))		
+						unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
+
+						if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type))
+						header('location: annonces.php?idU='.GetUserId());
+						else
+						SetError(5);
+					}
+					else if($updateAnnonceResult)
+					{
+						header('location: annonces.php?idU='.GetUserId());
+						if(!is_null($supprimerMediaActuel))		
+						unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
+					}
+					else
+					SetError(11);
+				}	
+			}							
 	}
-	else
-	SetError(6);
 }
+else
+{
+	if(isset($_GET['idA']))
+	{		
+		$nomAnnonce = $annonceInfoOld[4];
+		$description = $annonceInfoOld[5];
+		$dateDebut = $annonceInfoOld[1];
+		$dateFin = $annonceInfoOld[2];	
+		$motsClesSelectPost= [];
+		foreach($motsClesOld as $motCle)
+		{
+			array_push($motsClesSelectPost,$motCle[0]);
+		}
+		$_POST['motsClesSelect'] = $motsClesSelectPost;
+	}
+}
+
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -101,15 +139,14 @@ if(isset($_POST['creer']))
 	
     <body>
 	
-
-	<?php ShowNavBar();?>
+	<?php ShowNavBar(); ?>
 		
 		<!-- Début section création d'annonce -->
 		<section class="jobs">
 			<div class="container">
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
 				<?php ShowError()?>
-					<form method="POST" action="creer-annonce.php" enctype="multipart/form-data">		
+					<form method="POST" action="modifier-annonce.php?idA=<?= $_GET['idA']."&idU=".$_GET['idU']?>" enctype="multipart/form-data">		
 						<label for="nomAnnonce" >Nom de l'annonce</label>									
                         <input required id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce" value="<?=$nomAnnonce?>">
 						<label for="description" >Description de votre annonce</label>									
@@ -120,17 +157,24 @@ if(isset($_POST['creer']))
 						<input required name="dateFin" id="dateFin"  type="date" class="form-control input-lg" value="<?=$dateFin?>">	
 						<label for="keywords" >Les tags de votre annonce (Veuillez en sélectionner 1 à plusieurs)</label>									
 						<?php
-						ShowSelectKeywords($motsClesSelectPost);
+						ShowSelectKeywords($_POST['motsClesSelect']);
 						?>
                         <label for="media" >Média souhaitant être inclu à votre annonce (Image ou un fichier PDF) (Optionnel)</label>
                         <input id="media" name="media" type="file" accept=".png,.jpg,.jpeg,.pdf" class="form-control input-lg" >
+						<?php
+						if(!empty($annonceInfoOld[6])&&!empty($annonceInfoOld[7])&& !empty($annonceInfoOld[8]))
+						{
+							echo "<label for=\"enleverMedia\">Supprimer le média actuel (À cocher si oui)</label>
+							<input id=\"enleverMedia\" name=\"enleverMedia\" class=\"form-control input-lg\" type=\"checkbox\"";if($supprimerMediaActuel)echo"checked"; echo "/>";
+						}
+						?>  
 						<fieldset>
 						<div class="row">	
 							<div class='col'>  
 							<input type="reset" name="reset" id="reset" class="form-control btn btn-primary" value="reset"/>
 							</div>											
 							<div class='col'> 
-							<input type="submit" name="creer" id="creer" class="form-control btn btn-primary" value="Créer annonce">
+							<input type="submit" name="update" id="update" class="form-control btn btn-primary" value="Mettre à Jour">
 							</div>
 						</div>
 						</fieldset>	
