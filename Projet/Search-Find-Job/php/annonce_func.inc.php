@@ -64,7 +64,6 @@ function DeleteAnnonce($idAnnonce, $idUser)
   }
   return $answer;
 }
-
 function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type, $supprimerMediaActuel)
 {
   try {
@@ -530,3 +529,4 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
   }
   echo $annonce;
 }
+

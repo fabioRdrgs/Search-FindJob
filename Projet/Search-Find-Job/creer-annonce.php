@@ -55,7 +55,9 @@ if(isset($_POST['creer']))
 			$type = null;
 			$dir = null;
 			$filename = null;
+
 			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());
+
 		}
 
 		if(isset($createAnnonceResult) && $createAnnonceResult)
@@ -99,7 +101,8 @@ if(isset($_POST['creer']))
 	
     <body>
 	
-	<?php ShowNavBar(); ?>
+
+	<?php ShowNavBar();?>
 		
 		<!-- Début section création d'annonce -->
 		<section class="jobs">
