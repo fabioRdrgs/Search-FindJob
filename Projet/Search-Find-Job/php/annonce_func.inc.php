@@ -4,21 +4,7 @@ require_once 'db.inc.php';
 // SQL
 // ==========================================================================================================
 
-/**
- * Permet de créer un nouveau Job
- *
- * @param string $nomEntreprise
- * @param string $nomPoste
- * @param int $nombrePlace
- * @param string $adresse
- * @param string $siteweb
- * @param string $mail
- * @param string $apropos
- * @param int $idUtilisateur
- * @param <string, string> $listeCompetences Peut être null -> Pas de compétences ajoutées
- * @param string $logo Peut être vide -> Pas de logo
- * @return bool Si true = Job Created, sinon erreur SQL
- */
+
 function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$file,$type,$idUtilisateur)
 {
   try {
@@ -55,6 +41,98 @@ function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$di
 
     return true;
   } catch (PDOException $e) {
+    db()->rollBack();
+    return false;
+  }
+}
+
+function DeleteAnnonce($idAnnonce, $idUser)
+{
+  static $ps = null;
+  $sql = "DELETE FROM `annonces` WHERE (`id` = :IDANNONCE) AND (`utilisateurs_id`=:IDUSER);";
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+    $ps->bindParam(':IDUSER', $idUser, PDO::PARAM_INT);
+    $ps->execute();
+    $answer = true;
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
+function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type, $supprimerMediaActuel)
+{
+  try {
+    db()->beginTransaction();
+
+    static $psAnnonce = null;
+    if ($psAnnonce == null)
+      $psAnnonce = db()->prepare("UPDATE `annonces` SET 
+      date_debut = :DATEDEBUT, 
+      date_fin = :DATEFIN, 
+      titre = :TITRE, 
+      description = :DESCRIPTION WHERE (id = :IDANNONCE)");
+      $psAnnonce->bindParam(':TITRE', $nomAnnonce, PDO::PARAM_STR);
+      $psAnnonce->bindParam(':DESCRIPTION', $description, PDO::PARAM_STR);
+      $psAnnonce->bindParam(':DATEDEBUT', $dateDebut, PDO::PARAM_STR);
+      $psAnnonce->bindParam(':DATEFIN', $dateFin, PDO::PARAM_STR);
+      $psAnnonce->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+      $psAnnonce->execute();
+
+    if(!empty($supprimerMediaActuel))
+    {
+      static $psDeleteCurrentMedia = null;
+      if($psDeleteCurrentMedia == null)
+       $psDeleteCurrentMedia = db()->prepare("UPDATE `annonces` SET media_path = NULL, media_nom = NULL, media_type = NULL WHERE id = :IDANNONCE");
+       $psDeleteCurrentMedia->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+       $psDeleteCurrentMedia->execute();
+
+    }
+
+    if(!empty($dir) && !empty($filename) && !empty($type))
+    {
+        static $psMedia = null;
+        if($psMedia == null)
+        $psMedia = db()->prepare("UPDATE `annonces` SET media_path = :MEDIAPATH, media_nom = :MEDIANOM, media_type = :MEDIATYPE  WHERE (id = :IDANNONCE)");
+        $psMedia->bindParam(':MEDIAPATH', $dir, PDO::PARAM_STR);
+        $psMedia->bindParam(':MEDIANOM', $filename, PDO::PARAM_STR);
+        $psMedia->bindParam(':MEDIATYPE', $type, PDO::PARAM_STR);
+        $psMedia->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+        $psMedia->execute();
+    }
+    if(!empty($keywords))
+    {
+      static $psKeywordsDelete = null;
+      if($psKeywordsDelete == null)
+       $psKeywordsDelete = db()->prepare("DELETE FROM `annonces_has_keywords` WHERE annonces_id = :IDANNONCE");
+       $psKeywordsDelete->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+       $psKeywordsDelete->execute();
+
+       static $psKeywordsAdd = null;
+       if($psKeywordsAdd == null)
+        $psKeywordsAdd = db()->prepare("INSERT INTO `annonces_has_keywords` (`annonces_id`,`keywords_id`) 
+        VALUES (:ANNONCESID,:KEYWORDSID)");
+   
+        foreach($keywords as $keyword)
+        {
+          $psKeywordsAdd->bindParam(':ANNONCESID',$idAnnonce,PDO::PARAM_INT);
+          $psKeywordsAdd->bindParam(':KEYWORDSID',$keyword,PDO::PARAM_INT);
+          $psKeywordsAdd->execute();
+        }   
+          
+    }
+   
+    db()->commit();
+
+    return true;
+  } 
+  catch (PDOException $e) 
+  {
     db()->rollBack();
     return false;
   }
@@ -106,7 +184,7 @@ function ShowSelectKeywords($motsClesSelectPost)
   $select="";
   $select.= "<div class=\"row-fluid\">";
   $select.=	"<select id=\"motsClesSelect\" name=\"motsClesSelect[]\" multiple class=\"selectpicker\" data-show-subtext=\"true\" data-live-search=\"true\">";
-foreach($keywords as $keyword)
+  foreach($keywords as $keyword)
 {
   if(in_array($keyword[0],$motsClesSelectPost))
   $select.="<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
@@ -137,7 +215,7 @@ function GetAnnonceInfo($idAnnonce)
   return $answer;
 }
 
-function GetFollowersByIdAnnonce()
+function GetFollowersByIdAnnonce($idAnnonce)
 {
   static $ps = null;
   $sql = 'SELECT utilisateurs.login, wishlists.date FROM `annonces` JOIN `wishlists` ON (annonces.id = wishlists.annonces_id) JOIN `utilisateurs` ON (wishlists.utilisateurs_id = utilisateurs.id) WHERE annonces.id = :IDANNONCE';
@@ -184,7 +262,7 @@ for ($i=0; $i < $countKeywords; $i++)
   if($i == $countKeywords-1)
   $sql.=")";
 }
-$sql.="  ORDER BY date_publication ASC LIMIT :LIMIT";
+$sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
 
 
   if ($ps == null) {
@@ -234,7 +312,7 @@ for ($i=0; $i < $countKeywords; $i++)
   if($i == $countKeywords-1)
   $sql.=")";
 }
-$sql.="  ORDER BY date_publication ASC LIMIT :LIMIT";
+$sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
 
 
   if ($ps == null) {
@@ -292,11 +370,14 @@ function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$i
 		$affichageAnnonce .= "	<div class=\"row\">";
 		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
 		$affichageAnnonce .= "			<div class=\"company-content\">";
-		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
+		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3></a>";
 		$affichageAnnonce .= "				<p><span class=\"company-name\">
 											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
 											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
-											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
+											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span>";
+    $affichageAnnonce.= "<a  href=\"modifier-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Modifier </a>";
+    $affichageAnnonce.= "<a id=\"supprimerAnnonce\" href=\"supprimer-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Supprimer </a>";                
+    $affichageAnnonce.="</p>";
     $affichageAnnonce.= "<p><span>";
     if(!empty($keywords))
     {
@@ -317,7 +398,7 @@ function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$i
 		$affichageAnnonce .= "			</div>";
 		$affichageAnnonce .= "		</div>";
 		$affichageAnnonce .= "	</div>";
-		$affichageAnnonce .= "</div></a>";
+		$affichageAnnonce .= "</div>";
 		echo $affichageAnnonce; 
 	}
 }
@@ -349,11 +430,12 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     {
       foreach($followers as $follower)
       {
-        $annonce.= "<li><span>".$follower[0]."</span>".$follower[1]."</li>";
+        $annonce.= "<li><span>".$follower[0]."</span> le ".$follower[1]."</li>";
       }
     }
     else
     $annonce.=                "<li><b>Vous n'avez pas de followers sur cette annonce</b></li>";
+
     $annonce.=                "</ul>";
     $annonce.=              "</div>";
     $annonce.=              "</br>";
@@ -366,14 +448,29 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=                "</div>";
     $annonce.=              "</div>";
     $annonce.=              "<div class=\"panel panel-default\">";
-    if($annonceInfo[8] == "pdf")
-    {
-      $annonce.= "<embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500\" height=\"375\" type=\"application/pdf\">";
+  
+    if(!empty($annonceInfo[8]))
+    {  
+      $annonce.= "<table style=\"text-align: center;margin: auto\">";
+      if($annonceInfo[8] == "pdf")
+      {
+        $annonce.= "<tr><td><embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500px\" height=\"600px\" type=\"application/pdf\"></td></tr>
+        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+        </a></td></tr><tr><td><label for=\"download\">Télécharger le PDF</label></td></tr>";
+      }
+      else
+      {
+        $annonce.= "<tr><td><img width=\"500px\" height=\"600px\"  src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></td></tr>
+        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+        </a></td></tr><tr><td><label for=\"download\">Télécharger l'image</label></td></tr>";
+      }
+      $annonce.= "</table>";
     }
     else
-    {
-      $annonce.= "<img src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\">";
-    }
+    $annonce.= "<p>Pas de média disponible</p>";
+   
     $annonce.=              "</div>";
     $annonce.=            "</div>";
     $annonce.=          "</div>";

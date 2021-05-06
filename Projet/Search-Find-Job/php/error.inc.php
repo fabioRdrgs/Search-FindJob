@@ -31,8 +31,14 @@ function ShowError()
                 $message = "Le média fournit n'est pas du bon type";
                 break;
             case 9:
-                $message ="L'email fournit n'est pas valide";
+                $message = "L'email fournit n'est pas valide";
                 break;
+            case 10:
+                $message = "Une erreur s'est produite lors de la suppression de l'annonce";
+                    break;
+                    case 11:
+                        $message= "Une erreur s'est produite lors de la mise à jour de l'annonce";
+                        break;
             default:
                 $message = "";
                 break;
@@ -46,4 +52,11 @@ function ShowError()
 function SetError($number)
 {
     $_POST['errormsg'] = $number;
+}
+function GetError()
+{
+    if(!isset($_POST['errormsg']))
+    return null;
+    else
+    return $_POST['errormsg'];
 }

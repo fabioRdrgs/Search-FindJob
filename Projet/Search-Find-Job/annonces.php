@@ -1,13 +1,15 @@
 <?php
 require_once './php/nav.inc.php';
 require_once './php/annonce_func.inc.php';
+require_once './php/error.inc.php';
 $titre = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'descAnnonce',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 if(!isset($_SESSION))
 session_start();
-
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
+if(isset($_GET['error']))
+SetError($_GET['error']);
 
 if(!isset($_GET['limit']))
 $_GET['limit'] = 1;
@@ -61,7 +63,7 @@ if(isset($_POST['plusAnnonces']))
 		if(isset($_GET['idU'])) echo"?idU=".$_GET['idU']."&limit=".$_GET['limit'];else echo "?limit=".$_GET['limit']?>">
 		<section class="jobs">
 			<div class="container">
-			
+			<?php ShowError();?>
 				<div class="row heading">
 					<h2>Cherchez votre annonce</h2>
 				</div>
@@ -75,15 +77,15 @@ if(isset($_POST['plusAnnonces']))
 						<div class="col-md-10 col-sm-9 pull-right">
 							<ul class="filter-list">
 								<li>
-									<label for="nomAnnonce">Nom Annonce</label>
+									<label for="nomAnnonce">Nom d'annonce</label>
 									<input class="form-control input-lg" id="nomAnnonce" style="width:24rem;"  name="nomAnnonce" type="text" placeholder="Rechercher une annonce" value="<?= $titre?>"/>
 								</li>
 								<li>
-									<label for="descAnnonce">Description Annonce</label>
+									<label for="descAnnonce">Description d'annonce</label>
 									<input class="form-control input-lg"id="descAnnonce" style="width:40rem;" name="descAnnonce" type="text" placeholder="Rechercher par description" value="<?= $description?>"/>
 								</li>
 								<li>
-								<label for="motsClesSelect">Rechercher par Mots Clés</label>
+								<label for="motsClesSelect"> Mots Clés</label>
 									<?php ShowSelectKeywords($motsClesSelectPost);?>
 								</li>
 								<li>
@@ -126,13 +128,13 @@ if(isset($_POST['rechercher']))
 		</form>
 
 		<?php include_once './php/footer.inc.html'?>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 		<script type="text/javascript" src="js/jquery.min.js"></script>
 		<script type="text/javascript" src="js/owl.carousel.min.js"></script>
 		<script src="js/bootsnav.js"></script>
 		<script src="js/main.js"></script>
-	
+		<script src="js/annonces.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.3/js/bootstrap-select.min.js"></script>
 		
     </body>
