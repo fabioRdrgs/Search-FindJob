@@ -78,6 +78,25 @@ function GetKeywords()
   return $answer;
 }
 
+function GetKeywordsByIdAnnonce($idAnnonce)
+{
+  static $ps = null;
+  $sql = 'SELECT keywords.id, keywords.label FROM `keywords` JOIN `annonces_has_keywords` ON (keywords.id = annonces_has_keywords.keywords_id) WHERE annonces_has_keywords.annonces_id = :IDANNONCE';
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindValue(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+    if ($ps->execute())
+      $answer = $ps->fetchAll(PDO::FETCH_NUM);
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
 function ShowSelectKeywords($motsClesSelectPost)
 {
   if(!isset($motsClesSelectPost))
@@ -112,6 +131,25 @@ function GetAnnonceInfo($idAnnonce)
     $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
     if ($ps->execute())
       $answer = $ps->fetch(PDO::FETCH_NUM);
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
+function GetFollowersByIdAnnonce()
+{
+  static $ps = null;
+  $sql = 'SELECT utilisateurs.login, wishlists.date FROM `annonces` JOIN `wishlists` ON (annonces.id = wishlists.annonces_id) JOIN `utilisateurs` ON (wishlists.utilisateurs_id = utilisateurs.id) WHERE annonces.id = :IDANNONCE';
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+    if ($ps->execute())
+      $answer = $ps->fetchAll(PDO::FETCH_NUM);
   } catch (PDOException $e) {
     echo $e->getMessage();
   }
@@ -232,10 +270,7 @@ function ShowAnnoncesChercheur($titre,$description,$motsClesSelectPost,$limit)
 		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
 		$affichageAnnonce .= "			<div class=\"company-content\">";
 		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
-		$affichageAnnonce .= "				<p><span class=\"company-name\">
-											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
-											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
-											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
+		$affichageAnnonce .= "				<p><span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
 		$affichageAnnonce .= "			</div>";
 		$affichageAnnonce .= "		</div>";
 		$affichageAnnonce .= "	</div>";
@@ -250,6 +285,8 @@ function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$i
 	if($annonces != false)
 	foreach($annonces as $annonce)
 	{
+    $keywords = GetKeywordsByIdAnnonce($annonce[0]);
+    $followers = GetFollowersByIdAnnonce($annonce[0]);
 		$affichageAnnonce = "";
 		$affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
 		$affichageAnnonce .= "	<div class=\"row\">";
@@ -260,6 +297,23 @@ function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$i
 											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
 											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
 											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
+    $affichageAnnonce.= "<p><span>";
+    if(!empty($keywords))
+    {
+      for ($i=0; $i < count($keywords); $i++) {
+        if($i==0)
+        $affichageAnnonce.= $keywords[$i][1];
+        else
+        $affichageAnnonce.= ", ".$keywords[$i][1];
+      }
+    }
+    $affichageAnnonce .="</span>";
+    $affichageAnnonce .= "<span>Nombre de followers : ";
+    if(!empty($followers))
+    $affichageAnnonce .= count($followers);
+    else
+    $affichageAnnonce .="0";
+    $affichageAnnonce .="</span></p>";
 		$affichageAnnonce .= "			</div>";
 		$affichageAnnonce .= "		</div>";
 		$affichageAnnonce .= "	</div>";
@@ -274,6 +328,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
   $annonce = "";
   if($typeUser =="Annonceur")
   {    
+    $followers = GetFollowersByIdAnnonce($annonceInfo[0]);
     $annonce.= "<section class=\"profile-detail\">";
     $annonce.=    "<div class=\"container\">";
     $annonce.=      "<div class=\"col-md-12\">";
@@ -282,14 +337,23 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
     $annonce.=              "<div class=\"profile-content\">";
     $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
-    $annonce.=                "<p>Nombre de followers : </p>";
+    $annonce.=                "<p>Nombre de followers : ";
+    if(!empty($followers))
+    $annonce.= count($followers);
+    else
+    $annonce.= "0";
+    $annonce.= "</p>";
     $annonce.=                "<ul class=\"information\">";
     $annonce.=                "<div class=\"panel panel-default\"><h4>Followers</h4></div>";
-    $annonce.=                "<li><span>Address:</span>Menlo Park, CA</li>";
-    $annonce.=                "<li><span>Website:</span>Google.com</li>";
-    $annonce.=                "<li><span>Employee:</span>50,000 - 70,000 employer</li>";
-    $annonce.=                "<li><span>Mail:</span>info@google.com</li>";
-    $annonce.=                "<li><span>From:</span>1998</li>";
+    if(!empty($followers))
+    {
+      foreach($followers as $follower)
+      {
+        $annonce.= "<li><span>".$follower[0]."</span>".$follower[1]."</li>";
+      }
+    }
+    else
+    $annonce.=                "<li><b>Vous n'avez pas de followers sur cette annonce</b></li>";
     $annonce.=                "</ul>";
     $annonce.=              "</div>";
     $annonce.=              "</br>";
