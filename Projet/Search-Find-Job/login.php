@@ -3,7 +3,7 @@ if(!isset($_SESSION))
 {
 session_start();
 }
-require_once './php/error.inc.php';
+require_once './php/alert.inc.php';
 require_once './php/user_func.inc.php';
 require_once './php/nav.inc.php';
 

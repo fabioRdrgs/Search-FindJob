@@ -15,7 +15,35 @@ font-family: 'Montserrat', sans-serif;
 font-size:15px;
 color:#636e7b;
 }
-section{
+table{
+    display: inline-block;
+    max-height: 50rem;
+    overflow-y : scroll;
+}
+select{
+    width:100%;
+}
+tbody 
+{
+    width: 100%;
+  }
+  
+  tr 
+  {
+    width: 100%;
+  }
+  
+  td 
+  {
+    width: 33.33%;
+}
+table > tbody > tr > td > input[type=text]
+{
+     margin: auto;
+     text-align: center;
+}
+section
+{
 padding:70px 0px 60px 0px;
 }
 h1, h2, h3, h4, h5, h6 {

@@ -104,11 +104,9 @@ function ConnectUser($email, $password)
       $_SESSION['user']['id'] = $infoUser[0];
       $_SESSION['user']['login'] = $infoUser[1];
       $_SESSION['user']['type']=$infoUser[2];
-      unset($infoUser);
       
       return true;
     }  
-  unset($infoUser);
   }
   return false;
 }
@@ -143,17 +141,12 @@ function RegisterUser($email,$password,$type)
   if(VerifyIfMailExists($email) == null || VerifyIfMailExists($email) == false)
   {
     $encPassword = password_hash($password,PASSWORD_DEFAULT);
-    unset($password);
     if(CreateUser($email,$encPassword,$type))
     ChangeLoginState(true);
     $infoUser = GetUserInfo($email);
     $_SESSION['user']['id'] = $infoUser[0];
     $_SESSION['user']['login'] = $infoUser[1];
     $_SESSION['user']['type'] = $infoUser[2];
-
-    unset($infoUser);
-    unset($encPassword);
-
     return true;
   }
   return false;

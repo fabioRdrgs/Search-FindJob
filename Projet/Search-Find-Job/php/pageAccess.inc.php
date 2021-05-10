@@ -1,7 +1,7 @@
 <?php
 // Nom de la page chargée (sans l'extension)
 require_once './php/user_func.inc.php';
-require_once './php/error.inc.php';
+require_once './php/alert.inc.php';
 $script = basename($_SERVER['SCRIPT_NAME'], '.php');
 if(!isset($_SESSION))
 {

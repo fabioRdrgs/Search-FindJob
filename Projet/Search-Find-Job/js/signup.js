@@ -32,7 +32,7 @@ $("input").on('keyup',function(){
         return;
     }
 
-    if(pswd.length > 6&&pswd == pswdVer&&email.length > 0 && email.search(/^([\w\d._\-#])+@([\w\d._\-#]+[.][\w\d._\-#]+)+$/) != -1)
+    if(pswd.length > 0&&pswd == pswdVer&&email.length > 0 && email.search(/^([\w\d._\-#])+@([\w\d._\-#]+[.][\w\d._\-#]+)+$/) != -1)
     {
         $("#register").prop('disabled',false);
     }

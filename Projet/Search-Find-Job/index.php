@@ -1,5 +1,5 @@
 <?php
-require_once './php/error.inc.php';
+require_once './php/alert.inc.php';
 require_once './php/nav.inc.php';
 if(!isset($_SESSION))
 session_start();
