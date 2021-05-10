@@ -15,7 +15,7 @@ font-family: 'Montserrat', sans-serif;
 font-size:15px;
 color:#636e7b;
 }
-table{
+#tableUsers{
     display: inline-block;
     max-height: 50rem;
     overflow-y : scroll;
@@ -23,11 +23,41 @@ table{
 select{
     width:100%;
 }
+#tableKeywords{
+    margin:auto;
+    display: block;
+    max-height: 50rem;
+    max-width: 70rem;
+    overflow-y : scroll;
+}
+
+#tableAddKeywords{
+    width: fit-content;
+    margin-right: auto;
+    margin-top: auto;
+    
+    margin-bottom: auto;
+    display: block;
+    max-height: 50rem;
+    overflow-y : scroll;
+
+}
+#tableAddKeywords > tbody > tr > td {
+    width: 100%; 
+}
+#tableAddKeywords > tbody > tr > td > input{
+    width: 30rem; 
+}
+#tableKeywords > tbody > tr > td{
+    width: 100%;
+}
+thead{
+    width: 100%;
+}
 tbody 
 {
     width: 100%;
-  }
-  
+}
   tr 
   {
     width: 100%;
@@ -36,7 +66,10 @@ tbody
   td 
   {
     width: 33.33%;
-}
+  }
+  td > input{
+      width: 100%;
+  }
 table > tbody > tr > td > input[type=text]
 {
      margin: auto;

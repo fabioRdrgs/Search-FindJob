@@ -87,7 +87,7 @@ if(isset($_POST['updateChanges']))
 										if($_GET['gestion'] == "utilisateurs")
 										ShowUserManagement();
 										else if($_GET['gestion'] =="motscles")
-										echo "";
+										ShowKeywordManagement();
 									};?>
            
 			</div>

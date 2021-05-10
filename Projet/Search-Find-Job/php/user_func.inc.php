@@ -140,8 +140,8 @@ function RegisterUser($email,$password,$type)
 {
   if(VerifyIfMailExists($email) == null || VerifyIfMailExists($email) == false)
   {
-    $encPassword = password_hash($password,PASSWORD_DEFAULT);
-    if(CreateUser($email,$encPassword,$type))
+    $hashedPassword = password_hash($password,PASSWORD_DEFAULT);
+    if(CreateUser($email,$hashedPassword,$type))
     ChangeLoginState(true);
     $infoUser = GetUserInfo($email);
     $_SESSION['user']['id'] = $infoUser[0];

@@ -1,6 +1,6 @@
 <?php
 require_once 'db.inc.php';
-
+require_once 'annonce_func.inc.php';
 function GetUsers()
 {
   static $ps = null;
@@ -111,7 +111,7 @@ function ShowUserManagement()
 {
     $users = GetUsers();
     $table="";
-    $table.="<table class=\"table table-bordered table-striped mb-0\">";
+    $table.="<table  id=\"tableUsers\" class=\"table table-bordered table-striped mb-0\">";
     $table.="  <thead>";
     $table.="       <tr>";
     $table.="           <th scope=\"col\">#</th>";
@@ -134,5 +134,59 @@ function ShowUserManagement()
     }      
       $table.=" </tbody>";
     $table.=" </table>";
+    echo $table;
+}
+function ShowKeywordManagement()
+{
+    $keywords = GetKeywords();
+    $table="";
+    $table.="<table>";
+    $table.="<tr>";
+    $table.="<td>";
+
+    $table.="<table id=\"tableKeywords\" class=\"table table-bordered table-striped mb-0\">";
+    $table.="  <thead>";
+    $table.="       <tr>";
+    $table.="           <th scope=\"col\">#</th>";
+    $table.="           <th scope=\"col\">Label</th>";
+    $table.="           <th scope=\"col\">Supprimer</th>";
+    $table.="       </tr>";    
+    $table.="  </thead>";
+    $table.="  <tbody>";
+    foreach($keywords as $keyword)
+    {
+        $table.="   <tr>";
+        $table.="       <th scope=\"row\"><input readonly name=\"idKeyword[]\" type=\"number\" value=\"".$keyword[0]."\"/></th>";
+        $table.="       <td scope=\"row\"><input type=\"text\" name=\"labelsKeywords[]\" value=\"".$keyword[1]."\"/></td>";
+        $table.="       <td scope=\"row\"><input type=\"checkbox\" class=\"form-control input-lg\" name=\"deleteCheckbox[]\" value=\"".$keyword[0]."\"/></td>";
+        $table.="   </tr>";
+    }      
+    $table.=" </tbody>";
+    $table.=" </table>";
+
+    $table.="</td>";
+    $table.="<td>";
+
+    $table.="<table id=\"tableAddKeywords\" class=\"table table-bordered table-striped mb-0\">";
+    $table.="  <thead>";
+    $table.="       <tr>";
+    $table.="           <th scope=\"col\">Ajouter des mots clés</th>";
+    $table.="       </tr>";    
+    $table.="  </thead>";
+    $table.="  <tbody>";
+    foreach($keywords as $keyword)
+    {
+        $table.="   <tr>";
+        $table.="       <td><input readonly name=\"labelNewKeywords[]\" type=\"number\" /></td>";
+        $table.="   </tr>";
+    }      
+    $table.=" </tbody>";
+    $table.=" </table>";
+    
+    $table.="</td>";
+    $table.="</tr>";
+    $table.=" </table>";
+
+    
     echo $table;
 }
