@@ -42,7 +42,7 @@ if(isset($_POST['creer']))
 
 				if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
 				{		
-					SetError(8); 
+					SetAlert("error",8); 
 				}
 				else
 				{
@@ -70,14 +70,14 @@ if(isset($_POST['creer']))
 					header('location: annonces.php?idU='.GetUserId());
 				}  
 				else
-					SetError(5);
+				SetAlert("error",5);
 			}
 			else
 			header('location: annonces.php?idU='.GetUserId());
 		}		
 	}
 	else
-	SetError(6);
+	SetAlert("error",6);
 }
 ?>
 <!doctype html>
@@ -108,7 +108,11 @@ if(isset($_POST['creer']))
 		<section class="jobs">
 			<div class="container">
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
-				<?php ShowError()?>
+					
+				<?php ShowAlert()?>
+				<div class="row heading">
+					<h2>Créez votre annonce</h2>
+				</div>
 					<form method="POST" action="creer-annonce.php" enctype="multipart/form-data">		
 						<label for="nomAnnonce" >Nom de l'annonce</label>									
                         <input required id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce" value="<?=$nomAnnonce?>">

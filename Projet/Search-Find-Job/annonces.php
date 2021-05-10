@@ -2,6 +2,7 @@
 require_once './php/nav.inc.php';
 require_once './php/annonce_func.inc.php';
 require_once './php/error.inc.php';
+require_once './php/pageAccess.inc.php';
 $titre = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'descAnnonce',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
@@ -9,7 +10,7 @@ if(!isset($_SESSION))
 session_start();
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 if(isset($_GET['error']))
-SetError($_GET['error']);
+SetAlert("error",$_GET['error']);
 
 if(!isset($_GET['limit']))
 $_GET['limit'] = 1;
@@ -63,7 +64,7 @@ if(isset($_POST['plusAnnonces']))
 		if(isset($_GET['idU'])) echo"?idU=".$_GET['idU']."&limit=".$_GET['limit'];else echo "?limit=".$_GET['limit']?>">
 		<section class="jobs">
 			<div class="container">
-			<?php ShowError();?>
+			<?php ShowAlert();?>
 				<div class="row heading">
 					<h2>Cherchez votre annonce</h2>
 				</div>
@@ -107,10 +108,10 @@ if(isset($_POST['rechercher']))
 {
 	if(GetUserType() == "Annonceur")
 	{
-		if(isset($_GET['idU']))
+		if(!isset($_GET['idU']))
+		$_GET['idU'] = null;
+		
 		ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,4*$_GET['limit'],$_GET['idU']);
-		else
-		ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,4*$_GET['limit'],null);
 	}
 	else if(GetUserType() == "Chercheur")
 	{

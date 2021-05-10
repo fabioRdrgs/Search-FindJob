@@ -44,7 +44,7 @@ if(isset($_POST['update']))
 
 				if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
 				{		
-					SetError(8); 
+					SetAlert("error",8); 
 				}				
 			}
 		}
@@ -67,7 +67,7 @@ if(isset($_POST['update']))
 				$motsClesChange = true;
 			}
 
-			if(empty(GetError()))
+			if(empty(GetAlert()))
 			{
 				if($supprimerMediaActuel ||$nomAnnonce != $annonceInfoOld[4] || $description != $annonceInfoOld[5] || $dateDebut != $annonceInfoOld[1] || $dateFin != $annonceInfoOld[2] || $motsClesChange || !empty($dir) || !empty($filename) || !empty($type))
 				{
@@ -86,7 +86,7 @@ if(isset($_POST['update']))
 						if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type))
 						header('location: annonces.php?idU='.GetUserId());
 						else
-						SetError(5);
+						SetAlert("error",5);
 					}
 					else if($updateAnnonceResult)
 					{
@@ -95,7 +95,7 @@ if(isset($_POST['update']))
 						unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
 					}
 					else
-					SetError(11);
+					SetAlert("error",11);
 				}	
 			}							
 	}
@@ -145,7 +145,7 @@ else
 		<section class="jobs">
 			<div class="container">
 				<div class="col-md-6 col-sm-8 col-md-offset-3 col-sm-offset-2">
-				<?php ShowError()?>
+				<?php ShowAlert()?>
 					<form method="POST" action="modifier-annonce.php?idA=<?= $_GET['idA']."&idU=".$_GET['idU']?>" enctype="multipart/form-data">		
 						<label for="nomAnnonce" >Nom de l'annonce</label>									
                         <input required id="nomAnnonce" type="text" name="nomAnnonce" class="form-control input-lg" placeholder="Nom de l'annonce" value="<?=$nomAnnonce?>">

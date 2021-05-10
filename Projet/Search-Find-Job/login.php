@@ -11,19 +11,19 @@ SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
 //Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page
 if(isset($_GET['error']))
-SetError($_GET['error']);
+SetAlert("error",$_GET['error']);
 
 $_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
 //Lorsque l'utilisateur appuie sur se connecter
 if(isset($_POST['login']))
 //Teste si tous les champs sont remplis, sinon affiche une erreur
 if(empty($email) || empty($password))
-SetError(6);
+SetAlert("error",6);
 else
 //Teste si la connexion avec les données fournies réussie et connecte l'utilisateur avant de le renvoyer à l'accueil
 //Sinon, affiche une erreur
 if(!ConnectUser($email,$password))
-	SetError(1);
+	SetAlert("error",1);
 	else
 	header('location: index.php');
 ?>
@@ -56,7 +56,7 @@ if(!ConnectUser($email,$password))
 						<img class="img-responsive" alt="logo" src="img/logo.png">
 						<?php
 						 //Affiche une div contenant un message d'erreur
-						 ShowError();
+						 ShowAlert();
 						  ?>
 						<input required type="email" name="email"class="form-control input-lg" oninput="" placeholder="Adresse E-mail" value="<?=$email?>">
 						<input required type="password" name="password" class="form-control input-lg" placeholder="Mot de Passe">

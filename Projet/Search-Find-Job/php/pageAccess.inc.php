@@ -51,6 +51,11 @@ if($script == "annonce" && !isset($_GET['idA']))
             die("Vous n'avez pas accès à cette page");
         }
     }
+    if($script=="wishlist" && !isset($_GET['idU']))
+    {
+        header('location: index.php');
+        die("Vous n'avez pas accès à cette page");
+    }
 }
 //Si on n'est pas connecté, accède les tests de d'accès de page correspondant à l'état non connecté de l'utilisateur
 else

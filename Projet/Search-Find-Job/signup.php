@@ -9,11 +9,11 @@ if(!isset($_SESSION))
 session_start();
 }
 
-if(!isset($_SESSION['loggedIn']))
+if(!isset($_SESSION['user']['loggedIn']))
 ChangeLoginState(false);
 
 if(isset($_GET['error']))
-SetError($_GET['error']);
+SetAlert("error",$_GET['error']);
 
 if(isset($_POST['reset']))
 {
@@ -27,7 +27,7 @@ if (isset($_POST['register']))
 {
 	//Teste que tous les champs sont remplis, sinon affiche une erreur
 	if(empty($email) || empty($password) || empty($passwordVer))
-	SetError(6);
+	SetAlert("error",6);
 	else
 	//Teste si l'email existe déjà dans la base de donnée, si oui, affiche une erreur
 	if (!VerifyIfMailExists($email)) 
@@ -42,18 +42,18 @@ if (isset($_POST['register']))
 			{
 				//Teste si l'inscription est bien effectuée, sinon affiche une erreur
 				if (RegisterUser($email, $password, $type) == false)
-				SetError(5);
+				SetAlert("error",5);
 				else{;
 					header('location: index.php');
 				}
 			} else
-			SetError(4);
+			SetAlert("error",4);
 		}
 		else
-		SetError(9);
+		SetAlert("error",9);
 	}
 	else
-	SetError(3);
+	SetAlert("error",3);
 	unset($password);
 	unset($passwordVer);
 } 
@@ -95,7 +95,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 					<img class="img-responsive" alt="logo" src="img/logo.png">
 					<?php 
 					 //Affiche une div contenant un message d'erreur
-					ShowError();
+					ShowAlert();
 					?>
 					<input required type="email" id="email" name="email" class="form-control input-lg" placeholder="Adresse E-mail" value="<?=$email?>">
 					<input required type="password" id="pswd" name="password" class="form-control input-lg" placeholder="Mot de Passe">

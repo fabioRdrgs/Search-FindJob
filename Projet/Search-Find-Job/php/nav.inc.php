@@ -51,7 +51,7 @@ function ShowNavBar()
                                 </li>
                                 <li " .
                     SetActivePage("wishlist") . ">
-                                <a href=\"wishlist.php\">Ma Wishlist</a>
+                                <a href=\"wishlist.php?idU=".GetUserId()."\">Ma Wishlist</a>
                                 </li>";
                 break;
             case "Annonceur":
