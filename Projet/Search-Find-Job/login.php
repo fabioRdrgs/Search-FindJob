@@ -58,7 +58,7 @@ if(!ConnectUser($email,$password))
 						 //Affiche une div contenant un message d'erreur
 						 ShowError();
 						  ?>
-						<input required type="email" name="email"class="form-control input-lg" oninput="" placeholder="Adresse E-mail" value="<?=$email?>">
+						<input required type="email" name="email" class="form-control input-lg" oninput="" placeholder="Adresse E-mail" value="<?=$email?>">
 						<input required type="password" name="password" class="form-control input-lg" placeholder="Mot de Passe">
 						<fieldset>
 						<div class="row">	

@@ -2,6 +2,7 @@
 require_once './php/nav.inc.php';
 require_once './php/annonce_func.inc.php';
 require_once './php/error.inc.php';
+require_once './php/pageAccess.inc.php';
 $titre = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'descAnnonce',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
