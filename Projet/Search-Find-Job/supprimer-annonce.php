@@ -1,7 +1,6 @@
 <?php
 require_once './php/annonce_func.inc.php';
 require_once './php/user_func.inc.php';
-require_once './php/error.inc.php';
 require_once './php/pageAccess.inc.php';
 if(!isset($_SESSION))
 {

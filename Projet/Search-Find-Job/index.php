@@ -7,7 +7,7 @@ session_start();
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
 if(isset($_GET['error']))
-SetError($_GET['error']);
+SetAlert("error",$_GET['error']);
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -31,10 +31,12 @@ SetError($_GET['error']);
 	
 		<?php ShowNavBar(); ?>
 		<?php 
-		ShowError()?>
+		ShowAlert()?>
 		<!-- Main jumbotron for a primary marketing message or call to action -->
 		<section class="main-banner" style="background:#242c36 url(img/slider-01.jpg) no-repeat">
+		
 			<div class="container">
+
 				<div class="caption">
 					<h2>Build Your Career</h2>
 					<form>

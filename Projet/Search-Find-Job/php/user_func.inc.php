@@ -132,7 +132,7 @@ function GetUserId()
 }
 function IsUserLoggedIn()
 {
-  if($_SESSION['user']['loggedIn'])
+  if(isset($_SESSION['user']['loggedIn'])&&$_SESSION['user']['loggedIn'])
   return true;
   else
   return false;

@@ -1,6 +1,6 @@
 <?php
 require_once 'db.inc.php';
-
+include_once 'wishlist_func.inc.php';
 // SQL
 // ==========================================================================================================
 
@@ -233,6 +233,26 @@ function GetFollowersByIdAnnonce($idAnnonce)
   return $answer;
 }
 
+function AddToUserWishlist($idAnnonce,$idUtilisateur)
+{
+  static $ps = null;
+  $sql = 'INSERT INTO `wishlists` (`annonces_id`,`utilisateurs_id`) VALUES (:IDANNONCE,:IDUTILISATEUR)';
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+    $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
+    if ($ps->execute())
+      $answer = true;
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
 function GetAnnoncesFromSearchChercheur($titreAnnonce, $descAnnonce,$motsClesSelect,$limit)
 {
   if(is_null($motsClesSelect))
@@ -283,6 +303,7 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   }
   return $answer;
 }
+
 function GetAnnoncesFromSearchAnnonceur($titreAnnonce, $descAnnonce,$motsClesSelect,$limit,$idUtilisateur)
 {
   if(is_null($motsClesSelect))
@@ -374,8 +395,8 @@ function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$i
 											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
 											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
 											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span>";
-    $affichageAnnonce.= "<a  href=\"modifier-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Modifier </a>";
-    $affichageAnnonce.= "<a id=\"supprimerAnnonce\" href=\"supprimer-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Supprimer </a>";                
+    $affichageAnnonce.= "<a style=\"color:red\"href=\"modifier-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Modifier </a>";
+    $affichageAnnonce.= "<a style=\"color:red\" id=\"supprimerAnnonce\" href=\"supprimer-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Supprimer </a>";                
     $affichageAnnonce.="</p>";
     $affichageAnnonce.= "<p><span>";
     if(!empty($keywords))
@@ -405,6 +426,7 @@ function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$i
 function ShowAnnonceInfo($typeUser,$idAnnonce)
 {
   $annonceInfo = GetAnnonceInfo($idAnnonce);
+
   $annonce = "";
   if($typeUser =="Annonceur")
   {    
@@ -495,6 +517,12 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=                "</div>";                       
     $annonce.=                "<div class=\"panel-body\">";
     $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
+    if(!HasUserAddedAnnonceToWishlist($annonceInfo[0],GetUserId()))
+    {
+      $annonce.=                   "<form action=\"annonce.php?idA=".$annonceInfo[0]."\" method=\"POST\" >";
+      $annonce.=                   "<input name=\"addToWishlist\" type=\"submit\" class=\"form-control input-lg\" value=\"Ajouter annonce à wishlist\">";
+      $annonce.=                   "</form>";
+    }
     $annonce.=                "</div>";
     $annonce.=              "</div>";
     $annonce.=              "<div class=\"panel panel-default\">";

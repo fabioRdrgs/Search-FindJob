@@ -7,6 +7,12 @@ session_start();
 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
+if(isset($_POST['addToWishlist']))
+{
+    if(!HasUserAddedAnnonceToWishlist($_GET['idA'],GetUserId()))
+    if(AddToUserWishlist($_GET['idA'],GetUserId()))
+    SetAlert("success",1);
+}
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
@@ -29,7 +35,7 @@ SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
     <body>
 
 		<?php ShowNavBar();?>	 
-
+<?php ShowAlert();?>
 		<?php if(isset($_GET['idA']))ShowAnnonceInfo(GetUserType(),$_GET['idA'])?>
 
 	<?php include_once './php/footer.inc.html'?>
