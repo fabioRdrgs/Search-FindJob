@@ -1,6 +1,6 @@
 <?php
 require_once "./php/user_func.inc.php";
-require_once "./php/error.inc.php";
+require_once "./php/alert.inc.php";
 require_once './php/nav.inc.php';
 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));

@@ -45,6 +45,15 @@ function ShowAlert()
                     case 12:
                         $message = "Une erreur s'est produite lors du retrait d'une annonce de la wishlist";
                         break;
+                    case 13:
+                        $message = "Un ou plusieurs IDs fournis ne sont pas disponibles dans la Base de Données, veuillez fournir des ID valides";
+                        break;
+                    case 14:
+                        $message = "Un ou plusieurs Types fournis ne sont pas disponibles dans la Base de Données, veuillez fournir des Types valides";
+                        break;
+                    case 15:
+                        $message = "Une erreur s'est produite lors de la mise à jour des données";
+                        break;
                     default:
                         $message = "";
                         break;
@@ -60,6 +69,9 @@ function ShowAlert()
                     {
                         case 1:
                             $message = "Ajout de l'annonce à la wishlist avec succès";
+                            break;
+                        case 2:
+                            $message = "Données mises à jour avec succès";
                             break;
                         default:
                             $message = "";

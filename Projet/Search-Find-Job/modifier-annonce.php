@@ -1,7 +1,7 @@
 <?php
 require_once './php/annonce_func.inc.php';
 require_once "./php/pageAccess.inc.php";
-require_once './php/error.inc.php';
+require_once './php/alert.inc.php';
 require_once './php/nav.inc.php';
 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));

@@ -58,6 +58,7 @@ function DeleteAnnonce($idAnnonce, $idUser)
     $ps->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
     $ps->bindParam(':IDUSER', $idUser, PDO::PARAM_INT);
     $ps->execute();
+    if($ps->rowCount() > 0)
     $answer = true;
   } catch (PDOException $e) {
     echo $e->getMessage();
@@ -253,8 +254,9 @@ function AddToUserWishlist($idAnnonce,$idUtilisateur)
   return $answer;
 }
 
-function GetAnnoncesFromSearchChercheur($titreAnnonce, $descAnnonce,$motsClesSelect,$limit)
+function GetAnnoncesFromSearchChercheur($recherche,$motsClesSelect,$limit)
 {
+  $motsClesSelect=[];
   if(is_null($motsClesSelect))
   $countKeywords = 0;
   else
@@ -267,8 +269,8 @@ function GetAnnoncesFromSearchChercheur($titreAnnonce, $descAnnonce,$motsClesSel
   FROM annonces 
   JOIN annonces_has_keywords 
   ON (annonces.id = annonces_has_keywords.annonces_id) 
-  WHERE titre LIKE :TITREANNONCE 
-  AND description LIKE :DESCANNONCE 
+  WHERE (titre LIKE :RECHERCHE 
+  OR description LIKE :RECHERCHE) 
   AND date_debut <= CURRENT_DATE AND date_fin >= CURRENT_DATE ";
 
 for ($i=0; $i < $countKeywords; $i++) 
@@ -289,8 +291,7 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   }
   $answer = false;
   try {
-    $ps->bindValue(':TITREANNONCE', "%" . $titreAnnonce . "%", PDO::PARAM_STR);
-    $ps->bindValue(':DESCANNONCE', "%" .$descAnnonce. "%", PDO::PARAM_STR);
+    $ps->bindValue(':RECHERCHE', "%" . $recherche . "%", PDO::PARAM_STR);
     $ps->bindParam(':LIMIT',$limit,PDO::PARAM_INT);
     for ($i=0; $i <  $countKeywords; $i++) { 
       $ps->bindParam(':KEYWORD'.$i, $motsClesSelect[$i], PDO::PARAM_INT); 
@@ -304,8 +305,9 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   return $answer;
 }
 
-function GetAnnoncesFromSearchAnnonceur($titreAnnonce, $descAnnonce,$motsClesSelect,$limit,$idUtilisateur)
+function GetAnnoncesFromSearchAnnonceur($recherche, $motsClesSelect,$limit,$idUtilisateur)
 {
+		
   if(is_null($motsClesSelect))
   $countKeywords = 0;
   else
@@ -318,8 +320,8 @@ function GetAnnoncesFromSearchAnnonceur($titreAnnonce, $descAnnonce,$motsClesSel
   FROM annonces 
   JOIN annonces_has_keywords 
   ON (annonces.id = annonces_has_keywords.annonces_id) 
-  WHERE titre LIKE :TITREANNONCE 
-  AND description LIKE :DESCANNONCE 
+  WHERE (titre LIKE :RECHERCHE 
+  OR description LIKE :RECHERCHE)  
   AND (:IDUTILISATEUR IS NULL OR utilisateurs_id = :IDUTILISATEUR)";
 
 for ($i=0; $i < $countKeywords; $i++) 
@@ -340,8 +342,7 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   }
   $answer = false;
   try {
-    $ps->bindValue(':TITREANNONCE', "%" . $titreAnnonce . "%", PDO::PARAM_STR);
-    $ps->bindValue(':DESCANNONCE', "%" .$descAnnonce. "%", PDO::PARAM_STR);
+    $ps->bindValue(':RECHERCHE', "%" . $recherche . "%", PDO::PARAM_STR);
     $ps->bindParam(':IDUTILISATEUR', $idUtilisateur, PDO::PARAM_INT);
     $ps->bindParam(':LIMIT',$limit,PDO::PARAM_INT);
     for ($i=0; $i <  $countKeywords; $i++) { 
@@ -356,9 +357,9 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   return $answer;
 }
 
-function ShowAnnoncesChercheur($titre,$description,$motsClesSelectPost,$limit)
+function ShowAnnoncesChercheur($recherche,$motsClesSelectPost,$limit)
 {
-  $annonces = GetAnnoncesFromSearchChercheur($titre,$description,$motsClesSelectPost,$limit);
+  $annonces = GetAnnoncesFromSearchChercheur($recherche,$motsClesSelectPost,$limit);
 	if($annonces != false)
 	foreach($annonces as $annonce)
 	{
@@ -377,9 +378,9 @@ function ShowAnnoncesChercheur($titre,$description,$motsClesSelectPost,$limit)
 	}
 }
 
-function ShowAnnoncesAnnonceur($titre,$description,$motsClesSelectPost,$limit,$idUtilisateur)
+function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisateur)
 {
-  $annonces = GetAnnoncesFromSearchAnnonceur($titre,$description,$motsClesSelectPost,$limit,$idUtilisateur);
+  $annonces = GetAnnoncesFromSearchAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisateur);
 	if($annonces != false)
 	foreach($annonces as $annonce)
 	{
