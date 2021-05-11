@@ -1,5 +1,7 @@
 <?php
 // Nom de la page chargée (sans l'extension)
+
+//REGROUPER PAR IFs DE TYPE USER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 require_once './php/user_func.inc.php';
 require_once './php/alert.inc.php';
 $script = basename($_SERVER['SCRIPT_NAME'], '.php');
@@ -28,7 +30,11 @@ if($script == "annonce" && !isset($_GET['idA']))
         header('location: index.php');
         die("Vous n'avez pas accès à cette page");
     }
-    if($script == "administration" && GetUserType() != "Admin")
+    if($script == "administration" && GetUserType() != "Admin" )
+    {
+        header('location: index.php?error=7');
+        die("Vous n'avez pas accès à cette page");
+    }else if($script =="administration" && !isset($_GET['gestion']))
     {
         header('location: index.php?error=7');
         die("Vous n'avez pas accès à cette page");
@@ -54,6 +60,16 @@ if($script == "annonce" && !isset($_GET['idA']))
     if($script=="wishlist" && !isset($_GET['idU']))
     {
         header('location: index.php');
+        die("Vous n'avez pas accès à cette page");
+    }
+    else if($script=="wishlist" && GetUserType() != "Chercheur")
+    {
+        header('location: index.php?error=7');
+        die("Vous n'avez pas accès à cette page");
+    }
+    if($script=="annonces" && isset($_GET['idU'])&&GetUserType()!="Annonceur")
+    {
+        header('location: annonces.php');
         die("Vous n'avez pas accès à cette page");
     }
 }

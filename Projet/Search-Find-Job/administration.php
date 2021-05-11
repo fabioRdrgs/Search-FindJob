@@ -7,6 +7,11 @@ require_once './php/admin_func.inc.php';
 $idsUtilisateur = filter_input(INPUT_POST,'idUser',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 $typesUtilisateur = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 $motsDePasseUtilisateur = filter_input(INPUT_POST,'passwordUser',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+$motsClesIdPost = filter_input(INPUT_POST,'idKeyword',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
+$motsClesPost = filter_input(INPUT_POST,'labelsKeywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+$newMotsClesPost = filter_input(INPUT_POST,'labelNewKeywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+$deleteKeywordCheckboxPost = filter_input(INPUT_POST,'deleteCheckbox',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
+
 if(!isset($_SESSION))
 session_start();
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
@@ -23,24 +28,53 @@ if(isset($_POST['plusAnnonces']))
 
 if(isset($_POST['updateChanges']))
 {
-    if(IsEveryGivenIndexInDB($idsUtilisateur))
+    if($_GET['gestion'] == "utilisateurs")
     {
-        if(IsEveryGivenTypeInDB($typesUtilisateur))
+        if(IsEveryGivenIndexInDB($idsUtilisateur))
         {
-            for ($i=0; $i < count($idsUtilisateur); $i++) { 
-                if(!empty($motsDePasseUtilisateur[$i]))
-                $motDePassHash = password_hash($motsDePasseUtilisateur[$i], PASSWORD_DEFAULT);
-
-                if(!UpdateUser($idsUtilisateur[$i],$typesUtilisateur[$i], $motDePassHash))
-                return SetAlert("error",15);
-            }       
-            SetAlert("success",2);
-        }
+            if(IsEveryGivenTypeInDB($typesUtilisateur))
+            {
+                for ($i=0; $i < count($idsUtilisateur); $i++) { 
+                    if(!empty($motsDePasseUtilisateur[$i]))
+                    $motDePassHash = password_hash($motsDePasseUtilisateur[$i], PASSWORD_DEFAULT);
+    
+                    if(!UpdateUser($idsUtilisateur[$i],$typesUtilisateur[$i], $motDePassHash))
+                    return SetAlert("error",15);
+                }       
+                SetAlert("success",2);
+            }
+            else
+            SetAlert("error",14);
+        }      
         else
-        SetAlert("error",14);
-    }      
-    else
-    SetAlert("error",13);
+        SetAlert("error",13);
+    }
+    else if($_GET['gestion'] == "motscles")
+    {
+        if(isset($motsClesPost) && isset($motsClesIdPost))
+        {
+            for ($i=0; $i < count($motsClesIdPost); $i++) { 
+                UpdateKeyword($motsClesIdPost[$i],$motsClesPost[$i]);
+            }
+        }
+
+        if(isset($newMotsClesPost))
+        {
+            foreach($newMotsClesPost as $motCle)
+            {
+                if(!empty($motCle))
+                AddKeyword($motCle);
+            }
+        }
+
+        if(isset($deleteKeywordCheckboxPost))
+        {
+            foreach($deleteKeywordCheckboxPost as $motCleIdToDelete)
+            {
+                DeleteKeyword($motCleIdToDelete);
+            }
+        }
+    }
 }
 
 ?>
@@ -49,7 +83,7 @@ if(isset($_POST['updateChanges']))
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Jober Desk | Responsive Job Portal Template</title>
+        <title>Administration</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		
@@ -103,5 +137,6 @@ if(isset($_POST['updateChanges']))
 		<script type="text/javascript" src="js/owl.carousel.min.js"></script>
 		<script src="js/bootsnav.js"></script>
 		<script src="js/main.js"></script>
+        <script src="js/administration.js"></script>
     </body>
 </html>

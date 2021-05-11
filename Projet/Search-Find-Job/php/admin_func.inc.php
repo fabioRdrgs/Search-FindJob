@@ -18,6 +18,67 @@ function GetUsers()
   }
   return $answer;
 }
+
+function AddKeyword($label)
+{
+  static $ps = null;
+  $sql = 'INSERT INTO `keywords` (`label`) VALUES (:LABEL)';
+
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(":LABEL",$label,PDO::PARAM_STR);
+    if ($ps->execute())
+      $answer = true;
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
+
+function UpdateKeyword($idKeyword,$label)
+{
+  static $ps = null;
+
+  $sql = "UPDATE `keywords` SET `label` = :LABEL WHERE (`id` = :IDKEYWORD)";
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(':IDKEYWORD', $idKeyword, PDO::PARAM_INT);
+    $ps->bindParam(':LABEL', $label, PDO::PARAM_STR);
+    $ps->execute();
+    if($ps->rowCount() > 0)
+    $answer = true;
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
+function DeleteKeyword($idKeyword)
+{
+  static $ps = null;
+  $sql = "DELETE FROM `keywords` WHERE (`id` = :IDKEYWORD);";
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(':IDKEYWORD', $idKeyword, PDO::PARAM_INT);
+    $ps->execute();
+    if($ps->rowCount() > 0)
+    $answer = true; 
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+
 function UpdateUser($idUtilisateur,$type,$password)
 { 
     try {     
@@ -170,16 +231,16 @@ function ShowKeywordManagement()
     $table.="<table id=\"tableAddKeywords\" class=\"table table-bordered table-striped mb-0\">";
     $table.="  <thead>";
     $table.="       <tr>";
-    $table.="           <th scope=\"col\">Ajouter des mots clés</th>";
+    $table.="           <th scope=\"col\">Ajouter des mots clés <button id=\"addLabel\" type=\"button\"/>+</button><button id=\"removeLabel\" type=\"button\"/>-</button></th>";
     $table.="       </tr>";    
     $table.="  </thead>";
-    $table.="  <tbody>";
-    foreach($keywords as $keyword)
-    {
-        $table.="   <tr>";
-        $table.="       <td><input readonly name=\"labelNewKeywords[]\" type=\"number\" /></td>";
-        $table.="   </tr>";
-    }      
+    $table.="  <tbody id=\"LabelBody\">";
+  
+    $table.= "<tr id=\"labelNewKeywords\">";
+    $table.="<td>";
+    $table.="<input  name=\"labelNewKeywords[]\" type=\"text\" placeholder=\"Nouveau Mot-Clé N°0\"/>";
+    $table.="</td>";
+    $table.="</tr>";    
     $table.=" </tbody>";
     $table.=" </table>";
     

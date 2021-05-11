@@ -58,6 +58,7 @@ function DeleteAnnonce($idAnnonce, $idUser)
     $ps->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
     $ps->bindParam(':IDUSER', $idUser, PDO::PARAM_INT);
     $ps->execute();
+    if($ps->rowCount() > 0)
     $answer = true;
   } catch (PDOException $e) {
     echo $e->getMessage();

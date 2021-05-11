@@ -33,20 +33,21 @@ select{
 
 #tableAddKeywords{
     width: fit-content;
+    max-width: fit-content;
     margin-right: auto;
     margin-top: auto;
-    
     margin-bottom: auto;
+    margin-left: 10%;
     display: block;
     max-height: 50rem;
+    height: 50rem;
     overflow-y : scroll;
-
 }
 #tableAddKeywords > tbody > tr > td {
     width: 100%; 
 }
 #tableAddKeywords > tbody > tr > td > input{
-    width: 30rem; 
+    width: 35rem; 
 }
 #tableKeywords > tbody > tr > td{
     width: 100%;
