@@ -2,6 +2,7 @@
 require_once './php/nav.inc.php';
 require_once './php/annonce_func.inc.php';
 require_once './php/pageAccess.inc.php';
+require_once './php/wishlist_func.inc.php';
 if(!isset($_SESSION))
 session_start();
 

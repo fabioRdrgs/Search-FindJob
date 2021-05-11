@@ -1,6 +1,5 @@
 <?php
-
 define("HOST", "localhost");
-define("DBNAME", "SearchAndFindDB");
+define("DBNAME", "SearchAndFindDBTest");
 define("DBUSER", "root");
 define("DBPWD", "");

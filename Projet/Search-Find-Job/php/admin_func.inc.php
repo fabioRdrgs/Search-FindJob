@@ -1,6 +1,13 @@
 <?php
 require_once 'db.inc.php';
 require_once 'annonce_func.inc.php';
+// SQL
+// ==========================================================================================================
+/**
+ * Permet de récupérer tous les utilsiateurs
+ *
+ * @return array Retourne un array contenant tous les utilisateurs et leurs informations
+ */
 function GetUsers()
 {
   static $ps = null;
@@ -18,7 +25,12 @@ function GetUsers()
   }
   return $answer;
 }
-
+/**
+ * Permet d'ajouter un nouveau mot-clé
+ *
+ * @param array $arrayLabel
+ * @return bool Retourne true si la transaction a été correctement effectuée, false dans le cas contraire
+ */
 function AddKeywords($arrayLabel)
 {
   try {
@@ -48,7 +60,13 @@ function AddKeywords($arrayLabel)
   }
 }
 
-
+/**
+ * Permet de mettre à jour les mots-clés fournis
+ *
+ * @param array $arrayIdKeyword
+ * @param array $arrayLabelKeyword
+ * @return bool Retourne true si la transaction a été correctement effectuée, false dans le cas contraire
+ */
 function UpdateKeywords($arrayIdKeyword,$arrayLabelKeyword)
 {
  
@@ -77,7 +95,12 @@ function UpdateKeywords($arrayIdKeyword,$arrayLabelKeyword)
       return false;
   }
 }
-
+/**
+ * Permet de supprimer les mots-clés fournis
+ *
+ * @param [type] $arrayIdKeyword
+ * @return bool Retourne true si la transaction a été correctement effectuée, false dans le cas contraire
+ */
 function DeleteKeywords($arrayIdKeyword)
 {
  
@@ -104,7 +127,14 @@ function DeleteKeywords($arrayIdKeyword)
         return false;
     }
 }
-
+/**
+ * Permet de mettre à jour les informations des utilisateurs fournis
+ *
+ * @param array $idUtilisateurArray
+ * @param array $typeArray
+ * @param array $passwordArray
+ * @return bool Retourne true si la transaction a été correctement effectuée, false dans le cas contraire
+ */
 function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
 { 
     try {       
@@ -152,6 +182,44 @@ function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
         return false;
     }
 }
+/**
+ * Pertmet de tester si tous les id utilisateurs existent dans la base
+ *
+ * @param array $idArray
+ * @return bool Retourne Vrai si tous les IDs fournis sont bien présent dans la base, sinon retourne false
+ */
+function IsEveryGivenIndexInDB($idArray)
+{
+    static $ps = null;
+    $sql = 'SELECT * FROM utilisateurs WHERE id=:IDUTILISATEUR';
+  
+    if ($ps == null) {
+      $ps = db()->prepare($sql);
+    }
+    $answer = true;
+    try {
+      db()->beginTransaction(); 
+
+        foreach($idArray as $id)
+        {
+            $ps->bindParam(':IDUTILISATEUR',$id,PDO::PARAM_INT);
+            if ($ps->execute() && $ps->rowCount() == 0)
+                $answer=false;
+        }
+    } catch (PDOException $e) {
+      echo $e->getMessage();
+    }
+    return $answer;
+}
+// PHP
+// ==========================================================================================================
+
+/**
+ * Permet d'afficher un select multiple contenant tous les types d'utilisateurs
+ *
+ * @param [type] $userType
+ * @return string Retourne le select multiple
+ */
 function CreateAllTypeSelect($userType)
 {
   $typeList = $GLOBALS['typeList'];
@@ -169,6 +237,12 @@ function CreateAllTypeSelect($userType)
         $select.="</select>";
   return  $select;
 }
+/**
+ * Permet de tester si les types fournis existent dans la base de donnée
+ *
+ * @param array $typeArray
+ * @return bool Retourne true si tous les types existent bien dans la base de donnée, retourne false dans le cas contraire
+ */
 function IsEveryGivenTypeInDB($typeArray)
 {
     $typeList = $GLOBALS['typeList'];
@@ -179,28 +253,12 @@ function IsEveryGivenTypeInDB($typeArray)
     }
     return true;
 }
-function IsEveryGivenIndexInDB($idArray)
-{
-    static $ps = null;
-    $sql = 'SELECT * FROM utilisateurs WHERE id=:IDUTILISATEUR';
-  
-    if ($ps == null) {
-      $ps = db()->prepare($sql);
-    }
-    $answer = true;
-    try {
-        foreach($idArray as $id)
-        {
-            $ps->bindParam(':IDUTILISATEUR',$id,PDO::PARAM_INT);
-            if ($ps->execute())
-            if(empty($ps->fetch(PDO::FETCH_NUM)))
-                $answer=false;
-        }
-    } catch (PDOException $e) {
-      echo $e->getMessage();
-    }
-    return $answer;
-}
+
+/**
+ * Permet d'afficher la vue gestion d'utilisateurs
+ *
+ * @return void Echo la gestion d'utilisateurs
+ */
 function ShowUserManagement()
 {
     $users = GetUsers();
@@ -230,13 +288,17 @@ function ShowUserManagement()
     $table.=" </table>";
     echo $table;
 }
+/**
+ * Permet d'afficher la vue gestion de Mots-dClés
+ *
+ * @return void Echo la gestion de Mots-Clés
+ */
 function ShowKeywordManagement()
 {
     $keywords = GetKeywords();
     $table="";
-    $table.="<table>";
-    $table.="<tr>";
-    $table.="<td>";
+    $table.=" <div class=\"row\">";
+    $table.="<div class=\"col-md-9\">";
 
     $table.="<table id=\"tableKeywords\" class=\"table table-bordered table-striped mb-0\">";
     $table.="  <thead>";
@@ -258,9 +320,8 @@ function ShowKeywordManagement()
     $table.=" </tbody>";
     $table.=" </table>";
 
-    $table.="</td>";
-    $table.="<td>";
-
+    $table.="</div>";
+    $table.="<div class=\"col-sm-1\">";
     $table.="<table id=\"tableAddKeywords\" class=\"table table-bordered table-striped mb-0\">";
     $table.="  <thead>";
     $table.="       <tr>";
@@ -277,9 +338,9 @@ function ShowKeywordManagement()
     $table.=" </tbody>";
     $table.=" </table>";
     
-    $table.="</td>";
-    $table.="</tr>";
-    $table.=" </table>";
+    $table.="</div>";
+    $table.="</div>";
+  
 
     
     echo $table;

@@ -78,7 +78,7 @@ if(isset($_POST['plusAnnonces']))
 							<ul class="filter-list">
 								<li>
 									<label for="rechercheAnnonce">Titre ou description</label>
-									<input class="form-control input-lg" id="rechercheAnnonce" style="width:30rem;"  name="rechercheAnnonce" type="text" placeholder="Rechercher une annonce" value="<?= $titre?>"/>
+									<input class="form-control input-lg" id="rechercheAnnonce" style="width:30rem;"  name="rechercheAnnonce" type="text" placeholder="Rechercher une annonce" value="<?php if(isset($rechercheAnnonce))echo$rechercheAnnonce?>"/>
 								</li>
 
 								<li>

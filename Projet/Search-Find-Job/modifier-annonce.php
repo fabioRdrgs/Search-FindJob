@@ -169,10 +169,7 @@ else
 						}
 						?>  
 						<fieldset>
-						<div class="row">	
-							<div class='col'>  
-							<input type="reset" name="reset" id="reset" class="form-control btn btn-primary" value="reset"/>
-							</div>											
+						<div class="row">										
 							<div class='col'> 
 							<input type="submit" name="update" id="update" class="form-control btn btn-primary" value="Mettre à Jour">
 							</div>

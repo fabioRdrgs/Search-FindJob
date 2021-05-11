@@ -6,7 +6,7 @@ session_start();
 require_once './php/alert.inc.php';
 require_once './php/user_func.inc.php';
 require_once './php/nav.inc.php';
-
+require_once './php/pageAccess.inc.php';
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
 //Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page

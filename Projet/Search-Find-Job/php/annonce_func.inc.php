@@ -4,7 +4,20 @@ include_once 'wishlist_func.inc.php';
 // SQL
 // ==========================================================================================================
 
-
+/**
+ * Permet de créer une annonce ainsi qu'ajouter les mots clés fournis à cette dernière
+ *
+ * @param string $nomAnnonce
+ * @param string $description
+ * @param date $dateDebut
+ * @param date $dateFin
+ * @param array $keywords
+ * @param string $dir
+ * @param string $file
+ * @param string $type
+ * @param int $idUtilisateur
+ * @return bool Retourne True si la transaction a bien été effectuée, false dans le cas contraire
+ */
 function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$file,$type,$idUtilisateur)
 {
   try {
@@ -45,7 +58,13 @@ function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$di
     return false;
   }
 }
-
+/**
+ * Permet de supprimer une annonce
+ *
+ * @param int $idAnnonce
+ * @param int $idUser
+ * @return bool Retourne True si la requête a bien été effectuée, false dans le cas contraire
+ */
 function DeleteAnnonce($idAnnonce, $idUser)
 {
   static $ps = null;
@@ -65,6 +84,22 @@ function DeleteAnnonce($idAnnonce, $idUser)
   }
   return $answer;
 }
+
+/**
+ * Permet de mettre à jour une annonce dans de multiples aspects: la mise à jour des données, remplacer le média de l'annonce ou l'enlever
+ *
+ * @param int $idAnnonce
+ * @param string $nomAnnonce
+ * @param string $description
+ * @param date $dateDebut
+ * @param date $dateFin
+ * @param array $keywords
+ * @param string $dir
+ * @param string $filename
+ * @param string $type
+ * @param bool/null $supprimerMediaActuel
+ * @return bool Retourne True si la transaction a bien été effectuée, false dans le cas contraire
+ */
 function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type, $supprimerMediaActuel)
 {
   try {
@@ -137,7 +172,11 @@ function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$
     return false;
   }
 }
-
+/**
+ * Permet de récupérer les Mots-Clés
+ *
+ * @return array Retourne un array contenant l'ensemble des mots-clés
+ */
 function GetKeywords()
 {
   static $ps = null;
@@ -155,7 +194,12 @@ function GetKeywords()
   }
   return $answer;
 }
-
+/**
+ * Permet de récupérer les mots-clés d'une annonce
+ *
+ * @param int $idAnnonce
+ * @return array Retourne un array contenant l'ensemble des mots-clés de l'annonce en question
+ */
 function GetKeywordsByIdAnnonce($idAnnonce)
 {
   static $ps = null;
@@ -175,27 +219,12 @@ function GetKeywordsByIdAnnonce($idAnnonce)
   return $answer;
 }
 
-function ShowSelectKeywords($motsClesSelectPost)
-{
-  if(!isset($motsClesSelectPost))
-  $motsClesSelectPost = [];
-
-  $keywords= GetKeywords();
-  $select="";
-  $select.= "<div class=\"row-fluid\">";
-  $select.=	"<select id=\"motsClesSelect\" name=\"motsClesSelect[]\" multiple class=\"selectpicker\" data-show-subtext=\"true\" data-live-search=\"true\">";
-  foreach($keywords as $keyword)
-{
-  if(in_array($keyword[0],$motsClesSelectPost))
-  $select.="<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
-  else
-  $select.="<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
-}
-  $select.=			"</select>";
-  $select.=			"</div>";
-  echo $select;
-}
-
+/**
+ * Récupère l'ensemble des informations d'une annonce
+ *
+ * @param int $idAnnonce
+ * @return array Retourne un array contenant l'ensemble des informations de l'annonce en question
+ */
 function GetAnnonceInfo($idAnnonce)
 {
   static $ps = null;
@@ -214,7 +243,12 @@ function GetAnnonceInfo($idAnnonce)
   }
   return $answer;
 }
-
+/**
+ * Retourne les personnes ayant ajouté une annonce à leur wishlist
+ *
+ * @param int $idAnnonce
+ * @return array Retourne un array contenant tous les utilisateurs ayant l'annonce dans leur wishlist avec la date d'ajout et leur login
+ */
 function GetFollowersByIdAnnonce($idAnnonce)
 {
   static $ps = null;
@@ -234,30 +268,17 @@ function GetFollowersByIdAnnonce($idAnnonce)
   return $answer;
 }
 
-function AddToUserWishlist($idAnnonce,$idUtilisateur)
-{
-  static $ps = null;
-  $sql = 'INSERT INTO `wishlists` (`annonces_id`,`utilisateurs_id`) VALUES (:IDANNONCE,:IDUTILISATEUR)';
-
-  if ($ps == null) {
-    $ps = db()->prepare($sql);
-  }
-  $answer = false;
-  try {
-    $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
-    $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
-    if ($ps->execute())
-      $answer = true;
-  } catch (PDOException $e) {
-    echo $e->getMessage();
-  }
-  return $answer;
-}
-
+/**
+ * Permet d'effectuer une recherche d'annonces dans la BDD avec les filtres appliqués par un chercheur
+ *
+ * @param string $recherche
+ * @param array $motsClesSelect
+ * @param int $limit
+ * @return array Retourne toutes les annonces résultant de la recherche
+ */
 function GetAnnoncesFromSearchChercheur($recherche,$motsClesSelect,$limit)
 {
-  $motsClesSelect=[];
-  if(is_null($motsClesSelect))
+  if(empty($motsClesSelect))
   $countKeywords = 0;
   else
   $countKeywords = count($motsClesSelect);
@@ -305,9 +326,17 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   return $answer;
 }
 
+/**
+ * Permet d'effectuer une recherche d'annonces dans la BDD avec les filtres appliqués par un Annonceur
+ *
+ * @param string $recherche
+ * @param array $motsClesSelect
+ * @param int $limit
+ * @param int $idUtilisateur
+ * @return array Retourne toutes les annonces résultant de la recherche
+ */
 function GetAnnoncesFromSearchAnnonceur($recherche, $motsClesSelect,$limit,$idUtilisateur)
 {
-		
   if(is_null($motsClesSelect))
   $countKeywords = 0;
   else
@@ -357,6 +386,45 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
   return $answer;
 }
 
+
+
+// PHP
+// ==========================================================================================================
+
+/**
+ * Permet d'afficher un select multiple avec recherche live
+ *
+ * @param array $motsClesSelectPost
+ * @return void Echo le select multiple créé
+ */
+function ShowSelectKeywords($motsClesSelectPost)
+{
+  if(!isset($motsClesSelectPost))
+  $motsClesSelectPost = [];
+
+  $keywords= GetKeywords();
+  $select="";
+  $select.= "<div class=\"row-fluid\">";
+  $select.=	"<select id=\"motsClesSelect\" name=\"motsClesSelect[]\" multiple class=\"selectpicker\" data-show-subtext=\"true\" data-live-search=\"true\">";
+  foreach($keywords as $keyword)
+{
+  if(in_array($keyword[0],$motsClesSelectPost))
+  $select.="<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+  else
+  $select.="<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+}
+  $select.=			"</select>";
+  $select.=			"</div>";
+  echo $select;
+}
+/**
+ * Permet d'afficher les annonces étant le résultat d'une recherche d'un Chercheur
+ *
+ * @param string $recherche
+ * @param array $motsClesSelectPost
+ * @param int $limit
+ * @return void Echo les annonces pour le chercheur résultant de la recherche 
+ */
 function ShowAnnoncesChercheur($recherche,$motsClesSelectPost,$limit)
 {
   $annonces = GetAnnoncesFromSearchChercheur($recherche,$motsClesSelectPost,$limit);
@@ -378,52 +446,74 @@ function ShowAnnoncesChercheur($recherche,$motsClesSelectPost,$limit)
 	}
 }
 
+
+/**
+ * Permet d'afficher les annonces étant le résultat d'une recherche d'un Annonceur
+ *
+ * @param string $recherche
+ * @param array $motsClesSelectPost
+ * @param int $limit
+ * @param int $idUtilisateur
+ * @return void Echo les annonces pour le chercheur résultant de la recherche 
+ */
 function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisateur)
 {
   $annonces = GetAnnoncesFromSearchAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisateur);
-	if($annonces != false)
-	foreach($annonces as $annonce)
-	{
-    $keywords = GetKeywordsByIdAnnonce($annonce[0]);
-    $followers = GetFollowersByIdAnnonce($annonce[0]);
-		$affichageAnnonce = "";
-		$affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
-		$affichageAnnonce .= "	<div class=\"row\">";
-		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
-		$affichageAnnonce .= "			<div class=\"company-content\">";
-		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3></a>";
-		$affichageAnnonce .= "				<p><span class=\"company-name\">
-											<i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
-											<i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
-											<span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span>";
-    $affichageAnnonce.= "<a style=\"color:red\"href=\"modifier-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Modifier </a>";
-    $affichageAnnonce.= "<a style=\"color:red\" id=\"supprimerAnnonce\" href=\"supprimer-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Supprimer </a>";                
-    $affichageAnnonce.="</p>";
-    $affichageAnnonce.= "<p><span>";
-    if(!empty($keywords))
+  $affichageAnnonce = "";
+	if(!empty($annonces))
+  {
+    foreach($annonces as $annonce)
     {
-      for ($i=0; $i < count($keywords); $i++) {
-        if($i==0)
-        $affichageAnnonce.= $keywords[$i][1];
-        else
-        $affichageAnnonce.= ", ".$keywords[$i][1];
+      $keywords = GetKeywordsByIdAnnonce($annonce[0]);
+      $followers = GetFollowersByIdAnnonce($annonce[0]);
+      
+      $affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
+      $affichageAnnonce .= "	<div class=\"row\">";
+      $affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
+      $affichageAnnonce .= "			<div class=\"company-content\">";
+      $affichageAnnonce .= "				<h3>".$annonce[4]."</h3></a>";
+      $affichageAnnonce .= "				<p><span class=\"company-name\">
+                        <i class=\"fa fa-calendar-check-o\"></i>".$annonce[1]."</span><span class=\"company-location\">
+                        <i class=\"fa fa-calendar-times-o\"></i>".$annonce[2]."</span>
+                        <span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span>";
+      $affichageAnnonce.= "<a style=\"color:red\"href=\"modifier-annonce.php?idA=".$annonce[0]."&idU=".$_GET['idU']."\"> Modifier </a>";
+      $affichageAnnonce.= "<a style=\"color:red\" id=\"supprimerAnnonce\" href=\"supprimer-annonce.php?idA=".$annonce[0]."&idU=".$idUtilisateur."\"> Supprimer </a>";                
+      $affichageAnnonce.="</p>";
+      $affichageAnnonce.= "<p><span>Mots-clés : ";
+      if(!empty($keywords))
+      {
+        for ($i=0; $i < count($keywords); $i++) {
+          if($i==0)
+          $affichageAnnonce.= $keywords[$i][1];
+          else
+          $affichageAnnonce.= ", ".$keywords[$i][1];
+        }
       }
+      $affichageAnnonce .="</span>";
+      $affichageAnnonce .= "<span>Nombre de followers : ";
+      if(!empty($followers))
+      $affichageAnnonce .= count($followers);
+      else
+      $affichageAnnonce .="0";
+      $affichageAnnonce .="</span></p>";
+      $affichageAnnonce .= "			</div>";
+      $affichageAnnonce .= "		</div>";
+      $affichageAnnonce .= "	</div>";
+      $affichageAnnonce .= "</div>";
+      
     }
-    $affichageAnnonce .="</span>";
-    $affichageAnnonce .= "<span>Nombre de followers : ";
-    if(!empty($followers))
-    $affichageAnnonce .= count($followers);
-    else
-    $affichageAnnonce .="0";
-    $affichageAnnonce .="</span></p>";
-		$affichageAnnonce .= "			</div>";
-		$affichageAnnonce .= "		</div>";
-		$affichageAnnonce .= "	</div>";
-		$affichageAnnonce .= "</div>";
-		echo $affichageAnnonce; 
-	}
+  }
+  else
+  $affichageAnnonce.="<p style=\"text-align:center;\">Vous n'avez pas d'annonces, créez-en !</p>";
+	echo $affichageAnnonce; 
 }
-
+/**
+ * Permet d'afficher les informations d'une annonce 
+ *
+ * @param string $typeUser
+ * @param id $idAnnonce
+ * @return void Echo les informations de l'annonce pour les afficher sur la page
+ */
 function ShowAnnonceInfo($typeUser,$idAnnonce)
 {
   $annonceInfo = GetAnnonceInfo($idAnnonce);
@@ -457,7 +547,6 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     }
     else
     $annonce.=                "<li><b>Vous n'avez pas de followers sur cette annonce</b></li>";
-
     $annonce.=                "</ul>";
     $annonce.=              "</div>";
     $annonce.=              "</br>";
@@ -492,7 +581,6 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     }
     else
     $annonce.= "<p>Pas de média disponible</p>";
-   
     $annonce.=              "</div>";
     $annonce.=            "</div>";
     $annonce.=          "</div>";
@@ -548,7 +636,6 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     }
     else
     $annonce.= "<p>Pas de média disponible</p>";
-   
     $annonce.=              "</div>";
     $annonce.=            "</div>";
     $annonce.=          "</div>";
@@ -558,4 +645,3 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
   }
   echo $annonce;
 }
-

@@ -102,7 +102,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 					<input required type="password" id="pswd2" name="passwordVerify" class="form-control input-lg" placeholder="Confirmez le Mot de Passe">
 					<?php 
 					//Affiche un select avec tous les types d'utilisateur actuel
-					CreateTypeSelect();
+					ShowTypeSelect();
 					?>
 					<fieldset>
 						<div class="row">	
@@ -114,7 +114,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 							</div>
 						</div>
 					</fieldset>	
-
+					<p>Vous possédez déjà un compte ? <a href="./login.php">Connectez vous</a></p>
 				</form>
 			</div>
 		</div>

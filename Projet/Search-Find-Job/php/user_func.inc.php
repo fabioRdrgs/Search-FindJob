@@ -9,8 +9,8 @@ require_once "./php/db.inc.php";
 /**
  * Récupère les informations de l'utilisateur
  *
- * @param [string] $email
- * @return void
+ * @param string $email
+ * @return array Renvoie les informations de l'utilisateur
  */
 function GetUserInfo($email)
 {
@@ -35,7 +35,14 @@ function GetUserInfo($email)
   }
 return $answer;
 }
-
+/**
+ * Permet de créer un nouvel utilisateur
+ *
+ * @param string $email
+ * @param string $password
+ * @param string $type
+ * @return bool Renvoie True si la requête s'est correctement effectuée, False dans le cas contraire
+ */
 function CreateUser($email, $password,$type)
 {
   static $ps = null;
@@ -56,6 +63,12 @@ function CreateUser($email, $password,$type)
   }
   return $answer;
 }
+/**
+ * Permet de vérifier si l'email fournit existe déjà dans la base de donnée
+ *
+ * @param string $email
+ * @return bool Renvoie true si l'email est déjà présent dans la base de donnée, False dans le cas contraire
+ */
 function VerifyIfMailExists($email)
 {
     
@@ -69,18 +82,22 @@ function VerifyIfMailExists($email)
   try {
     $ps->bindParam(':EMAIL', $email, PDO::PARAM_STR);
 
-    if ($ps->execute())
-      $answer = $ps->fetch(PDO::FETCH_NUM);
+    if ($ps->execute() && $ps->rowCount() > 0)
+      $answer = true;
   } catch (PDOException $e) {
     echo $e->getMessage();
   }
   return $answer;
 }
+// PHP
+// ==========================================================================================================
 
-/*                   PHP
- *   ************************************* 
+/**
+ * Permet d'afficher un select contenant les différents types d'utilisateurs
+ *
+ * @return void Echo le select de types d'utilisateur
  */
-function CreateTypeSelect()
+function ShowTypeSelect()
 {
   $typeList = $GLOBALS['typeList'];
   echo"<select required name=\"type\" class=\"form-control input-lg\">
@@ -92,7 +109,13 @@ function CreateTypeSelect()
   }
   echo"</select>";
 }
-
+/**
+ * Va tenter de connecter l'utilisateur si tous les tests sont valides
+ *
+ * @param string $email
+ * @param string $password
+ * @return bool Renvoie true si l'utilisateur a pu se connecter, false dans le cas contraire
+ */
 function ConnectUser($email, $password)
 {
   if(VerifyIfMailExists($email) != null)
@@ -110,10 +133,21 @@ function ConnectUser($email, $password)
   }
   return false;
 }
+/**
+ * Permet de changer l'état de connexion de l'utilisateur
+ *
+ * @param string $state
+ * @return void
+ */
 function ChangeLoginState($state)
 {
 $_SESSION['user']['loggedIn'] = $state;
 }
+/**
+ * Permet de récupérer le type de l'utilisateur connecté
+ *
+ * @return string/null Renvoie le type sous forme de string de l'utilisateur, sinon renvoie null
+ */
 function GetUserType()
 {
   if(IsUserLoggedIn())
@@ -121,6 +155,11 @@ function GetUserType()
   else
   return null;
 }
+/**
+ * Permet de récupérer l'ID de l'utilisateur
+ *
+ * @return void
+ */
 function GetUserId()
 {
   if(IsUserLoggedIn())
@@ -128,6 +167,11 @@ function GetUserId()
   else
   return null;
 }
+/**
+ * Permet de tester si l'utilisateur est connecté
+ *
+ * @return bool Renvoie True s'il est connecté, false dans le cas contraire
+ */
 function IsUserLoggedIn()
 {
   if(isset($_SESSION['user']['loggedIn'])&&$_SESSION['user']['loggedIn'])
@@ -135,7 +179,14 @@ function IsUserLoggedIn()
   else
   return false;
 }
-
+/**
+ * Permet d'effectuer quelques tests avant de faire appel à la fonction de création d'utilisateur
+ *
+ * @param string $email
+ * @param string $password
+ * @param string $type
+ * @return bool Renvoie True si l'utilisateur a bien été créé, false dans le cas contraire
+ */
 function RegisterUser($email,$password,$type)
 {
   if(VerifyIfMailExists($email) == null || VerifyIfMailExists($email) == false)

@@ -122,7 +122,7 @@ if(isset($_POST['creer']))
 						<input required name="dateDebut" id="dateDebut" type="date" class="form-control input-lg" value="<?=$dateDebut?>">
 						<label for="dateFin">Date de fin de votre annonce</label>									
 						<input required name="dateFin" id="dateFin"  type="date" class="form-control input-lg" value="<?=$dateFin?>">	
-						<label for="keywords" >Les tags de votre annonce (Veuillez en sélectionner 1 à plusieurs)</label>									
+						<label for="motsClesSelect" >Les tags de votre annonce (Veuillez en sélectionner 1 à plusieurs)</label>									
 						<?php
 						ShowSelectKeywords($motsClesSelectPost);
 						?>

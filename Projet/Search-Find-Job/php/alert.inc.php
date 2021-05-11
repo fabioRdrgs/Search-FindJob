@@ -5,7 +5,6 @@ function ShowAlert()
     {
         if($_POST['alertType'] == "error" && isset($_POST['alertNumber']))
         {
-
                 $message = "";
                 switch ($_POST['alertNumber']) 
                 {
@@ -86,9 +85,7 @@ function ShowAlert()
                 $message = "<div class=\"alert alert-success\" role=\"alert\">" . $message . "</div>";
         }
         echo $message;
-    }   
-   
-   
+    }    
 }
 
 function SetAlert($type,$number)

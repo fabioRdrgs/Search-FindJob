@@ -1,4 +1,14 @@
 <?php 
+// SQL
+// ==========================================================================================================
+
+/**
+ * Permet de tester si l'utilisateur a déjà ajouté une annonce dans sa wishlist
+ *
+ * @param int $idAnnonce
+ * @param int $idUtilisateur
+ * @return bool Retourne Vrai s'il possède déjà l'annonce dans sa Wishlist, False dans le cas contraire
+ */
 function HasUserAddedAnnonceToWishlist($idAnnonce,$idUtilisateur)
 {
   static $ps = null;
@@ -11,15 +21,46 @@ function HasUserAddedAnnonceToWishlist($idAnnonce,$idUtilisateur)
   try {
     $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
     $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
-    if ($ps->execute())
-    if(!empty($ps->fetchAll(PDO::FETCH_NUM)))
+    if ($ps->execute() && $ps->rowCount() > 0)
       $answer = true;
   } catch (PDOException $e) {
     echo $e->getMessage();
   }
   return $answer;
 }
+/**
+ * Permet d'ajouter une annonce à une wishlist d'un utilisateur
+ *
+ * @param int $idAnnonce
+ * @param int $idUtilisateur
+ * @return bool Retourne True si la requête a bien été effectuée, false dans le cas contraire
+ */
+function AddToUserWishlist($idAnnonce,$idUtilisateur)
+{
+  static $ps = null;
+  $sql = 'INSERT INTO `wishlists` (`annonces_id`,`utilisateurs_id`) VALUES (:IDANNONCE,:IDUTILISATEUR)';
 
+  if ($ps == null) {
+    $ps = db()->prepare($sql);
+  }
+  $answer = false;
+  try {
+    $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+    $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
+    if ($ps->execute())
+      $answer = true;
+  } catch (PDOException $e) {
+    echo $e->getMessage();
+  }
+  return $answer;
+}
+/**
+ * Permet de récupérer la Wishlist d'un utilisateur
+ *
+ * @param int $idUtilisateur
+ * @param int $limit
+ * @return array
+ */
 function GetWishlistForUser($idUtilisateur,$limit)
 {
     static $ps = null;
@@ -39,7 +80,13 @@ function GetWishlistForUser($idUtilisateur,$limit)
     }
     return $answer;
 }
-
+/**
+ * Permet de retirer une annonce de la wishlist d'un utilisateur
+ *
+ * @param int $idUtilisateur
+ * @param int $idAnnonce
+ * @return bool Retourne true si la requête s'est bien effectuée, false dans le cas contraire
+ */
 function RemoveWish($idUtilisateur,$idAnnonce)
 {
     static $ps = null;
@@ -60,6 +107,16 @@ function RemoveWish($idUtilisateur,$idAnnonce)
     return $answer;
 }
 
+// PHP
+// ==========================================================================================================
+
+/**
+ * Permet d'afficher la wishlist d'un utilisateur
+ *
+ * @param int $idUtilisateur
+ * @param int $limit
+ * @return void Echo la wishlist de l'utilisateur
+ */
 function ShowWishlist($idUtilisateur,$limit)
 {
   $wishes = GetWishlistForUser($idUtilisateur,$limit);
