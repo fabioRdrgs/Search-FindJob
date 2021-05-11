@@ -19,97 +19,130 @@ function GetUsers()
   return $answer;
 }
 
-function AddKeyword($label)
+function AddKeywords($arrayLabel)
 {
-  static $ps = null;
-  $sql = 'INSERT INTO `keywords` (`label`) VALUES (:LABEL)';
-
-  if ($ps == null) {
-    $ps = db()->prepare($sql);
-  }
-  $answer = false;
   try {
-    $ps->bindParam(":LABEL",$label,PDO::PARAM_STR);
-    if ($ps->execute())
-      $answer = true;
-  } catch (PDOException $e) {
-    echo $e->getMessage();
+    db()->beginTransaction();  
+    static $ps = null;
+    $sql = 'INSERT INTO `keywords` (`label`) VALUES (:LABEL)';
+  
+    if ($ps == null) {
+      $ps = db()->prepare($sql);
+    }
+
+    foreach($arrayLabel as $label)
+    {
+      if(!empty($label))
+      {
+        $ps->bindParam(":LABEL",$label,PDO::PARAM_STR);
+        $ps->execute();
+      }
+    }
+    db()->commit();
+    return true;
+  } 
+  catch (PDOException $e) 
+  {
+      db()->rollBack();
+      return false;
   }
-  return $answer;
 }
 
 
-function UpdateKeyword($idKeyword,$label)
+function UpdateKeywords($arrayIdKeyword,$arrayLabelKeyword)
 {
-  static $ps = null;
-
-  $sql = "UPDATE `keywords` SET `label` = :LABEL WHERE (`id` = :IDKEYWORD)";
-  if ($ps == null) {
-    $ps = db()->prepare($sql);
-  }
-  $answer = false;
+ 
   try {
-    $ps->bindParam(':IDKEYWORD', $idKeyword, PDO::PARAM_INT);
-    $ps->bindParam(':LABEL', $label, PDO::PARAM_STR);
-    $ps->execute();
-    if($ps->rowCount() > 0)
-    $answer = true;
-  } catch (PDOException $e) {
-    echo $e->getMessage();
+    db()->beginTransaction();  
+    static $ps = null;
+
+    $sql = "UPDATE `keywords` SET `label` = :LABEL WHERE (`id` = :IDKEYWORD)";
+    if ($ps == null) {
+      $ps = db()->prepare($sql);
+    }
+
+    for ($i=0; $i < count($arrayIdKeyword); $i++)
+    {
+      $ps->bindParam(':IDKEYWORD', $arrayIdKeyword[$i], PDO::PARAM_INT);
+      $ps->bindParam(':LABEL', $arrayLabelKeyword[$i], PDO::PARAM_STR);
+      $ps->execute();
+    }
+    
+    db()->commit();
+    return true;
+  } 
+  catch (PDOException $e) 
+  {
+      db()->rollBack();
+      return false;
   }
-  return $answer;
 }
 
-function DeleteKeyword($idKeyword)
+function DeleteKeywords($arrayIdKeyword)
 {
-  static $ps = null;
-  $sql = "DELETE FROM `keywords` WHERE (`id` = :IDKEYWORD);";
-  if ($ps == null) {
-    $ps = db()->prepare($sql);
-  }
-  $answer = false;
+ 
   try {
-    $ps->bindParam(':IDKEYWORD', $idKeyword, PDO::PARAM_INT);
-    $ps->execute();
-    if($ps->rowCount() > 0)
-    $answer = true; 
-  } catch (PDOException $e) {
-    echo $e->getMessage();
+    db()->beginTransaction();  
+    static $ps = null;
+    $sql = "DELETE FROM `keywords` WHERE (`id` = :IDKEYWORD);";
+    if ($ps == null) {
+      $ps = db()->prepare($sql);
+    }
+
+    foreach($arrayIdKeyword as $idKeyword)
+    {
+      $ps->bindParam(':IDKEYWORD', $idKeyword, PDO::PARAM_INT);
+      $ps->execute();
+    }
+  
+    db()->commit();
+    return true; 
   }
-  return $answer;
+  catch (PDOException $e) 
+    {
+        db()->rollBack();
+        return false;
+    }
 }
 
-function UpdateUser($idUtilisateur,$type,$password)
+function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
 { 
-    try {     
+    try {       
         db()->beginTransaction();  
-        if(!empty($type))
-        {
-            
-            static $psType = null;
-            $sqlType = 'UPDATE `utilisateurs` SET type = :TYPE WHERE id = :IDUTILISATEUR';
-        
-            if ($psType == null) {
-            $psType = db()->prepare($sqlType);
-            }
-            $psType->bindParam(':IDUTILISATEUR',$idUtilisateur,PDO::PARAM_INT);
-            $psType->bindParam(':TYPE',$type,PDO::PARAM_STR);   
-            $psType->execute();
-            
-        }        
-        if(!empty($password))
-        {
-            
-            static $psPassword = null;
-            $sqlPassword = 'UPDATE `utilisateurs` SET password = :PASSWORD WHERE id = :IDUTILISATEUR';
-            if ($psPassword == null) {
-                $psPassword = db()->prepare($sqlPassword);
-            }
-            $psPassword->bindParam(':IDUTILISATEUR',$idUtilisateur,PDO::PARAM_INT);
-            $psPassword->bindParam(':PASSWORD',$password,PDO::PARAM_STR);
-            $psPassword->execute();
-           
-        }      
+        static $psType = null;
+        $sqlType = 'UPDATE `utilisateurs` SET type = :TYPE WHERE id = :IDUTILISATEUR';
+    
+        if ($psType == null) {
+        $psType = db()->prepare($sqlType);
+        }
+
+        for ($i=0; $i < count($idUtilisateurArray); $i++)
+        { 
+          if(!empty($typeArray[$i]))
+          {                
+              $psType->bindParam(':IDUTILISATEUR',$idUtilisateurArray[$i],PDO::PARAM_INT);
+              $psType->bindParam(':TYPE',$typeArray[$i],PDO::PARAM_STR);   
+              $psType->execute();          
+          }   
+        }
+
+
+        static $psPassword = null;
+        $sqlPassword = 'UPDATE `utilisateurs` SET password = :PASSWORD WHERE id = :IDUTILISATEUR';
+        if ($psPassword == null) {
+            $psPassword = db()->prepare($sqlPassword);
+        }
+
+        for ($i=0; $i < count($idUtilisateurArray); $i++)
+        { 
+          if(!empty($passwordArray[$i]))
+          {       
+              $psPassword->bindParam(':IDUTILISATEUR',$idUtilisateurArray[$i],PDO::PARAM_INT);
+              $psPassword->bindParam(':PASSWORD',$passwordArray[$i],PDO::PARAM_STR);
+              $psPassword->execute();            
+          }  
+        }    
+
         db()->commit();
         return true;
     } 

@@ -54,6 +54,12 @@ function ShowAlert()
                     case 15:
                         $message = "Une erreur s'est produite lors de la mise à jour des données";
                         break;
+                    case 16:
+                        $message = "Une erreur s'est produite lors de la suppression des mots clés";
+                        break;
+                    case 17:
+                        $message = "Une erreur s'est produite lors de l'ajout des mots clés";
+                        break;
                     default:
                         $message = "";
                         break;

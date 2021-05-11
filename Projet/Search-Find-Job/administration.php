@@ -8,7 +8,7 @@ $idsUtilisateur = filter_input(INPUT_POST,'idUser',FILTER_SANITIZE_NUMBER_INT,FI
 $typesUtilisateur = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 $motsDePasseUtilisateur = filter_input(INPUT_POST,'passwordUser',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 $motsClesIdPost = filter_input(INPUT_POST,'idKeyword',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
-$motsClesPost = filter_input(INPUT_POST,'labelsKeywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
+$motsClesLabelsPost = filter_input(INPUT_POST,'labelsKeywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 $newMotsClesPost = filter_input(INPUT_POST,'labelNewKeywords',FILTER_SANITIZE_STRING,FILTER_REQUIRE_ARRAY);
 $deleteKeywordCheckboxPost = filter_input(INPUT_POST,'deleteCheckbox',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 
@@ -35,13 +35,11 @@ if(isset($_POST['updateChanges']))
             if(IsEveryGivenTypeInDB($typesUtilisateur))
             {
                 for ($i=0; $i < count($idsUtilisateur); $i++) { 
-                    if(!empty($motsDePasseUtilisateur[$i]))
-                    $motDePassHash = password_hash($motsDePasseUtilisateur[$i], PASSWORD_DEFAULT);
-    
-                    if(!UpdateUser($idsUtilisateur[$i],$typesUtilisateur[$i], $motDePassHash))
-                    return SetAlert("error",15);
+                   if(!empty($motsDePasseUtilisateur[$i]))
+                   $motsDePasseUtilisateur[$i] = password_hash($motsDePasseUtilisateur[$i], PASSWORD_DEFAULT);           
                 }       
-                SetAlert("success",2);
+                if(!UpdateUsers($idsUtilisateur,$typesUtilisateur, $motsDePasseUtilisateur))
+                SetAlert("error",15);    
             }
             else
             SetAlert("error",14);
@@ -51,30 +49,27 @@ if(isset($_POST['updateChanges']))
     }
     else if($_GET['gestion'] == "motscles")
     {
-        if(isset($motsClesPost) && isset($motsClesIdPost))
+        $state = true;
+        if(isset($motsClesLabelsPost) && isset($motsClesIdPost))
         {
-            for ($i=0; $i < count($motsClesIdPost); $i++) { 
-                UpdateKeyword($motsClesIdPost[$i],$motsClesPost[$i]);
-            }
+                if(!UpdateKeywords($motsClesIdPost,$motsClesLabelsPost))
+                SetAlert("error",15);      
         }
-
         if(isset($newMotsClesPost))
         {
-            foreach($newMotsClesPost as $motCle)
-            {
-                if(!empty($motCle))
-                AddKeyword($motCle);
-            }
+            if(!AddKeywords($newMotsClesPost))
+             SetAlert("error",17);
+        }
+        if(isset($deleteKeywordCheckboxPost))
+        {      
+            if(!DeleteKeywords($deleteKeywordCheckboxPost))   
+             SetAlert("error",16);     
         }
 
-        if(isset($deleteKeywordCheckboxPost))
-        {
-            foreach($deleteKeywordCheckboxPost as $motCleIdToDelete)
-            {
-                DeleteKeyword($motCleIdToDelete);
-            }
-        }
     }
+
+    if(GetAlert()[1] != "error")
+    SetAlert("success",2);
 }
 
 ?>
