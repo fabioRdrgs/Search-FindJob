@@ -27,27 +27,28 @@ if(isset($_POST['creer']))
 			$filename = $media[1];
 			$type = $media[2];
 			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());
-		}
-		//Si la création de l'annonce a été effectuée avec succès, procède vers l'upload du média si fournit
-		if(isset($createAnnonceResult) && $createAnnonceResult)
-		{
-			//Va effectuer l'upload du média sur le serveur si un média a été fournit
-			if($_FILES["media"]['error'] == 0)
+			//Si la création de l'annonce a été effectuée avec succès, procède vers l'upload du média si fournit
+			if(isset($createAnnonceResult) && $createAnnonceResult)
 			{
-				//Si l'upload a été effectué avec succès, renvoie à la page d'annonces, sinon, affiche une erreur
-				if(UploadMedia($dir,$filename,$type))
+				//Va effectuer l'upload du média sur le serveur si un média a été fournit
+				if($_FILES["media"]['error'] == 0)
 				{
-					header('location: annonces.php?idU='.GetUserId());
+					//Si l'upload a été effectué avec succès, renvoie à la page d'annonces, sinon, affiche une erreur
+					if(UploadMedia($dir,$filename,$type))
+					{
+						header('location: annonces.php?idU='.GetUserId().'&alert=success&num=3');
+					}
+					else
+					SetAlert("error",5);
 				}
+				//Sinon, effectue une simple redirection
 				else
-				SetAlert("error",5);
-			}
-			//Sinon, effectue une simple redirection
+				header('location: annonces.php?idU='.GetUserId().'&alert=success&num=3');
+			}	
 			else
-			header('location: annonces.php?idU='.GetUserId());
-		}	
-		else
-		SetAlert("error",19);	
+			SetAlert("error",19);	
+		}
+		
 	}
 	else
 	SetAlert("error",6);

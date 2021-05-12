@@ -1,7 +1,7 @@
 <?php
 //Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
+if(isset($_GET['alert'])&&isset($_GET['num']))
+SetAlert($_GET['alert'],$_GET['num']);
 /**
  * Permet d'afficher les alertes 
  *
@@ -76,6 +76,9 @@ function ShowAlert()
                     case 19:
                         $message = "Une erreur s'est produite lors de la création de l'annonce";
                         break;
+                    case 20:
+                        $message = "L'annonce voulue n'existe pas";
+                        break;
                     default:
                         $message = "";
                         break;
@@ -99,6 +102,9 @@ function ShowAlert()
                             break;
                         default:
                             $message = "";
+                            break;
+                        case 3:
+                            $message = "Annonce créée avec succès";
                             break;
                     }
                 //Créé l'alerte allant être affichée
@@ -127,10 +133,10 @@ function SetAlert($type,$number)
  */
 function GetAlert()
 {
-    if(!isset($_POST['errormsg']) &&!isset($_POST['alertType']))
+    if(!isset($_POST['alertNumber']) &&!isset($_POST['alertType']))
     return null;
     else   
-    return [$_POST['errormsg'],$_POST['alertType']];
+    return [$_POST['alertNumber'],$_POST['alertType']];
     
    
 }

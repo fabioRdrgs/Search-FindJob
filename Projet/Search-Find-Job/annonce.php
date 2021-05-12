@@ -36,8 +36,7 @@ if(isset($_POST['addToWishlist']))
 	
     <body>
 
-		<?php ShowNavBar();?>	 
-<?php ShowAlert();?>
+		<?php ShowNavBar(); ShowAlert();?>
 		<?php if(isset($_GET['idA']))ShowAnnonceInfo(GetUserType(),$_GET['idA'])?>
 
 	<?php include_once './php/footer.inc.html'?>

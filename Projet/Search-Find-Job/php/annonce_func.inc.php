@@ -491,7 +491,6 @@ function ShowSelectKeywords($motsClesSelectPost)
   //Si aucun mot-clé n'est fournit, définit la variable comme un array vide
   if(is_null($motsClesSelectPost))
   $motsClesSelectPost = [];
-
   //Récupère tous les mots-clés
   $keywords= GetKeywords();
   //Affecte à la variable tout le contenu HTML voulu
@@ -626,142 +625,151 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
 {
   //Récupère toutes les infos de l'annonce en question
   $annonceInfo = GetAnnonceInfo($idAnnonce);
-
-  $annonce = "";
-  //Affiche la vue d'infos d'annonce pour l'annonceur
-  if($typeUser =="Annonceur")
-  {    
-    //Récupère tous les followers de l'annonce
-    $followers = GetFollowersByIdAnnonce($annonceInfo[0]);
-    $annonce.= "<section class=\"profile-detail\">";
-    $annonce.=    "<div class=\"container\">";
-    $annonce.=      "<div class=\"col-md-12\">";
-    $annonce.=        "<div class=\"row\">";
-    $annonce.=          "<div class=\"basic-information\">";
-    $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
-    $annonce.=              "<div class=\"profile-content\">";
-    $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
-    $annonce.=                "<p>Nombre de followers : ";
-    //Affiche les followers de l'annonce s'il y en a
-    if(!empty($followers))
-    $annonce.= count($followers);
-    else
-    $annonce.= "0";
-    $annonce.= "</p>";
-    $annonce.=                "<ul class=\"information\">";
-    $annonce.=                "<div class=\"panel panel-default\"><h4>Followers</h4></div>";
-    if(!empty($followers))
-    {
-      foreach($followers as $follower)
-      {
-        $annonce.= "<li><span>".$follower[0]."</span> le ".$follower[1]."</li>";
-      }
-    }
-    else
-    $annonce.=                "<li><b>Vous n'avez pas de followers sur cette annonce</b></li>";
-
-    $annonce.=                "</ul>";
-    $annonce.=              "</div>";
-    $annonce.=              "</br>";
-    $annonce.=              "<div class=\"panel panel-default\">";
-    $annonce.=                "<div class=\"panel-heading\">";
-    $annonce.=                  "<i class=\"fa fa-user fa-fw\"></i> Description";
-    $annonce.=                "</div>";                       
-    $annonce.=                "<div  class=\"panel-body\">";
-    $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
-    $annonce.=                "</div>";
-    $annonce.=              "</div>";
-    $annonce.=              "<div class=\"panel panel-default\">";
-  
-    //Affiche le média de l'annonce s'il y en a un
-    if(!empty($annonceInfo[8]))
-    {  
-      $annonce.= "<table style=\"text-align: center;margin: auto\">";
-      if($annonceInfo[8] == "pdf")
-      {
-        $annonce.= "<tr><td><embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500px\" height=\"600px\" type=\"application/pdf\"></td></tr>
-        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
-        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
-        </a></td></tr><tr><td><label for=\"download\">Télécharger le PDF</label></td></tr>";
-      }
-      else
-      {
-        $annonce.= "<tr><td><img width=\"500px\" height=\"600px\"  src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></td></tr>
-        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
-        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
-        </a></td></tr><tr><td><label for=\"download\">Télécharger l'image</label></td></tr>";
-      }
-      $annonce.= "</table>";
-    }
-    else
-    $annonce.= "<p>Pas de média disponible</p>";
-    $annonce.=              "</div>";
-    $annonce.=            "</div>";
-    $annonce.=          "</div>";
-    $annonce.=        "</div>";
-    $annonce.=      "</div>";
-    $annonce.= "</section>";
-  }
-  //Affiche la vue d'infos d'annonce pour le chercheur
-  else if($typeUser == "Chercheur")
+  //S'assure que l'annonce que l'utilisateur souhaite consulter existe, sinon le redirige vers les annonces
+  if(empty($annonceInfo))
   {
-    $annonce.= "<section class=\"profile-detail\">";
-    $annonce.=    "<div class=\"container\">";
-    $annonce.=      "<div class=\"col-md-12\">";
-    $annonce.=        "<div class=\"row\">";
-    $annonce.=          "<div class=\"basic-information\">";
-    $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
-    $annonce.=              "<div class=\"profile-content\">";
-    $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
-    $annonce.=              "</div>";
-    $annonce.=              "</br>";
-    $annonce.=              "<div class=\"panel panel-default\">";
-    $annonce.=                "<div class=\"panel-heading\">";
-    $annonce.=                  "<i class=\"fa fa-user fa-fw\"></i> Description";
-    $annonce.=                "</div>";                       
-    $annonce.=                "<div class=\"panel-body\">";
-    $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
-    //Affihe un bouton pour ajouter l'annonce à la wishlist de l'utilisateur s'il ne l'a pas déjà fait
-    if(!HasUserAddedAnnonceToWishlist($annonceInfo[0],GetUserId()))
-    {
-      $annonce.=                   "<form action=\"annonce.php?idA=".$annonceInfo[0]."\" method=\"POST\" >";
-      $annonce.=                   "<input name=\"addToWishlist\" type=\"submit\" class=\"form-control input-lg\" value=\"Ajouter annonce à wishlist\">";
-      $annonce.=                   "</form>";
-    }
-    $annonce.=                "</div>";
-    $annonce.=              "</div>";
-    $annonce.=              "<div class=\"panel panel-default\">";
-    //Affiche le média de l'annonce s'il y en a un
-    if(!empty($annonceInfo[8]))
-    {  
-      $annonce.= "<table style=\"text-align: center;margin: auto\">";
-      if($annonceInfo[8] == "pdf")
+    header('location: annonces.php?alert=error&num=20');
+    die('Annonce inexistante');
+  }
+  else
+  {
+    $annonce = "";
+    //Affiche la vue d'infos d'annonce pour l'annonceur
+    if($typeUser =="Annonceur")
+    {    
+      //Récupère tous les followers de l'annonce
+      $followers = GetFollowersByIdAnnonce($annonceInfo[0]);
+      $annonce.= "<section class=\"profile-detail\">";
+      $annonce.=    "<div class=\"container\">";
+      $annonce.=      "<div class=\"col-md-12\">";
+      $annonce.=        "<div class=\"row\">";
+      $annonce.=          "<div class=\"basic-information\">";
+      $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
+      $annonce.=              "<div class=\"profile-content\">";
+      $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
+      $annonce.=                "<p>Nombre de followers : ";
+      //Affiche les followers de l'annonce s'il y en a
+      if(!empty($followers))
+      $annonce.= count($followers);
+      else
+      $annonce.= "0";
+      $annonce.= "</p>";
+      $annonce.=                "<ul class=\"information\">";
+      $annonce.=                "<div class=\"panel panel-default\"><h4>Followers</h4></div>";
+      if(!empty($followers))
       {
-        $annonce.= "<tr><td><embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500px\" height=\"600px\" type=\"application/pdf\"></td></tr>
-        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
-        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
-        </a></td></tr><tr><td><label for=\"download\">Télécharger le PDF</label></td></tr>";
+        foreach($followers as $follower)
+        {
+          $annonce.= "<li><span>".$follower[0]."</span> le ".$follower[1]."</li>";
+        }
       }
       else
-      {
-        $annonce.= "<tr><td><img width=\"500px\" height=\"600px\"  src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></td></tr>
-        <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
-        <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
-        </a></td></tr><tr><td><label for=\"download\">Télécharger l'image</label></td></tr>";
+      $annonce.=                "<li><b>Vous n'avez pas de followers sur cette annonce</b></li>";
+
+      $annonce.=                "</ul>";
+      $annonce.=              "</div>";
+      $annonce.=              "</br>";
+      $annonce.=              "<div class=\"panel panel-default\">";
+      $annonce.=                "<div class=\"panel-heading\">";
+      $annonce.=                  "<i class=\"fa fa-user fa-fw\"></i> Description";
+      $annonce.=                "</div>";                       
+      $annonce.=                "<div  class=\"panel-body\">";
+      $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
+      $annonce.=                "</div>";
+      $annonce.=              "</div>";
+      $annonce.=              "<div class=\"panel panel-default\">";
+    
+      //Affiche le média de l'annonce s'il y en a un
+      if(!empty($annonceInfo[8]))
+      {  
+        $annonce.= "<table style=\"text-align: center;margin: auto\">";
+        if($annonceInfo[8] == "pdf")
+        {
+          $annonce.= "<tr><td><embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500px\" height=\"600px\" type=\"application/pdf\"></td></tr>
+          <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+          <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+          </a></td></tr><tr><td><label for=\"download\">Télécharger le PDF</label></td></tr>";
+        }
+        else
+        {
+          $annonce.= "<tr><td><img width=\"500px\" height=\"600px\"  src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></td></tr>
+          <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+          <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+          </a></td></tr><tr><td><label for=\"download\">Télécharger l'image</label></td></tr>";
+        }
+        $annonce.= "</table>";
       }
-      $annonce.= "</table>";
+      else
+      $annonce.= "<p>Pas de média disponible</p>";
+      $annonce.=              "</div>";
+      $annonce.=            "</div>";
+      $annonce.=          "</div>";
+      $annonce.=        "</div>";
+      $annonce.=      "</div>";
+      $annonce.= "</section>";
     }
-    else
-    $annonce.= "<p>Pas de média disponible</p>";
-    $annonce.=              "</div>";
-    $annonce.=            "</div>";
-    $annonce.=          "</div>";
-    $annonce.=        "</div>";
-    $annonce.=      "</div>";
-    $annonce.= "</section>";
+    //Affiche la vue d'infos d'annonce pour le chercheur
+    else if($typeUser == "Chercheur")
+    {
+      $annonce.= "<section class=\"profile-detail\">";
+      $annonce.=    "<div class=\"container\">";
+      $annonce.=      "<div class=\"col-md-12\">";
+      $annonce.=        "<div class=\"row\">";
+      $annonce.=          "<div class=\"basic-information\">";
+      $annonce.=            "<div style=\"width:100%;\"class=\"col-md-9 col-sm-9\">";
+      $annonce.=              "<div class=\"profile-content\">";
+      $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
+      $annonce.=              "</div>";
+      $annonce.=              "</br>";
+      $annonce.=              "<div class=\"panel panel-default\">";
+      $annonce.=                "<div class=\"panel-heading\">";
+      $annonce.=                  "<i class=\"fa fa-user fa-fw\"></i> Description";
+      $annonce.=                "</div>";                       
+      $annonce.=                "<div class=\"panel-body\">";
+      $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
+      //Affihe un bouton pour ajouter l'annonce à la wishlist de l'utilisateur s'il ne l'a pas déjà fait
+      if(!HasUserAddedAnnonceToWishlist($annonceInfo[0],GetUserId()))
+      {
+        $annonce.=                   "<form action=\"annonce.php?idA=".$annonceInfo[0]."\" method=\"POST\" >";
+        $annonce.=                   "<input name=\"addToWishlist\" type=\"submit\" class=\"form-control input-lg\" value=\"Ajouter annonce à wishlist\">";
+        $annonce.=                   "</form>";
+      }
+      $annonce.=                "</div>";
+      $annonce.=              "</div>";
+      $annonce.=              "<div class=\"panel panel-default\">";
+      //Affiche le média de l'annonce s'il y en a un
+      if(!empty($annonceInfo[8]))
+      {  
+        $annonce.= "<table style=\"text-align: center;margin: auto\">";
+        if($annonceInfo[8] == "pdf")
+        {
+          $annonce.= "<tr><td><embed src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" width=\"500px\" height=\"600px\" type=\"application/pdf\"></td></tr>
+          <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+          <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+          </a></td></tr><tr><td><label for=\"download\">Télécharger le PDF</label></td></tr>";
+        }
+        else
+        {
+          $annonce.= "<tr><td><img width=\"500px\" height=\"600px\"  src=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" alt=\"Image annonce\"></td></tr>
+          <tr><td><a id=\"download\" href=\"".$annonceInfo[6].$annonceInfo[7].".".$annonceInfo[8]."\" download>
+          <img style=\"width:15rem;height:15rem;\" src=\"./img/downloadArrow.png\" alt=\"download arrow image\">
+          </a></td></tr><tr><td><label for=\"download\">Télécharger l'image</label></td></tr>";
+        }
+        $annonce.= "</table>";
+      }
+      else
+      $annonce.= "<p>Pas de média disponible</p>";
+      $annonce.=              "</div>";
+      $annonce.=            "</div>";
+      $annonce.=          "</div>";
+      $annonce.=        "</div>";
+      $annonce.=      "</div>";
+      $annonce.= "</section>";
+    }
+    //Echo le contenu HTML de l'annonce
+    echo $annonce;
   }
-  //Echo le contenu HTML de l'annonce
-  echo $annonce;
+  
 }
 
 function CheckMedia()

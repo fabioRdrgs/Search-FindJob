@@ -80,7 +80,7 @@ function GetWishlistForUser($idUtilisateur,$limit)
 {
     //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;
-    $sql = 'SELECT * FROM `wishlists` JOIN `annonces` ON (wishlists.annonces_id = annonces.id)WHERE wishlists.utilisateurs_id = :IDUTILISATEUR LIMIT :LIMIT';
+    $sql = 'SELECT * FROM `wishlists` JOIN `annonces` ON (wishlists.annonces_id = annonces.id)WHERE wishlists.utilisateurs_id = :IDUTILISATEUR ORDER BY `date` ASC LIMIT :LIMIT';
   
     //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
@@ -152,12 +152,15 @@ function ShowWishlist($idUtilisateur,$limit)
 {
   //Récupère toutes les annonces suivies par l'utilisateur en question
   $wishes = GetWishlistForUser($idUtilisateur,$limit);
+  $affichageAnnonce = "";
+
   //Si l'utilisateur suit des annonces, les affiche
 	if($wishes != false)
     {
+      
         foreach($wishes as $wish)
         {
-            $affichageAnnonce = "";
+         
             $affichageAnnonce .="<a href=\"annonce.php?idA=".$wish[3]."\">";
             $affichageAnnonce .="<div class=\"company-list\">";
             $affichageAnnonce .= "	<div class=\"row\">";
@@ -171,10 +174,9 @@ function ShowWishlist($idUtilisateur,$limit)
             $affichageAnnonce .= "	</div>";
             $affichageAnnonce .= "</div>";
         }
-        echo $affichageAnnonce; 
     }
     //Sinon affiche un message
     else
-    echo "<p style=\"text-align:center;\">Vous n'avez pas d'annonces dans votre Wishlist, ajoutez-en !</p>";
-
+    $affichageAnnonce .="<p style=\"text-align:center;\">Vous n'avez pas d'annonces dans votre Wishlist, ajoutez-en !</p>";
+    echo $affichageAnnonce;
 }

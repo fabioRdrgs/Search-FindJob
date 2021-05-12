@@ -29,7 +29,7 @@ ChangeLoginState(false);
         //Il ne pourra aller que sur les pages "annonces","creer-annonce","index","annonce","modifier-annonce" et supprimer-annonce
         if($script != "annonces" && $script != "creer-annonce" && $script != "index" && $script != "annonce" && $script != "modifier-annonce" && $script != "supprimer-annonce" && $script != 'logout')
         {
-            header('location: index.php?error=7');
+            header('location: index.php?alert=error&num=7');
             die("Vous n'avez pas accès à cette page");
         }
         //Il ne pourra pas aller sur la page annonces si l'id utilisateur n'est pas fournit en GET ou
@@ -59,9 +59,9 @@ ChangeLoginState(false);
     if(GetUserType() == "Chercheur")
     {
         //Il ne pourra aller que sur les pages "annonces","annonce","index" et "wishlist"
-        if($script != "annonces" && $script != "annonce" && $script != "index" && $script != "wishlist" && $script != 'logout')
+        if($script != "annonces" && $script != "annonce" && $script != "index" && $script != "wishlist" && $script != "logout" && $script != "supprimer-wish")
         {
-            header('location: index.php?error=7');
+            header('location: index.php?alert=error&num=7');
             die("Vous n'avez pas accès à cette page");
         }
         //Il ne pourra pas aller sur la page wishlist si l'id utilisateur n'est pas fournit en GET
@@ -104,7 +104,7 @@ else
     //Si l'utilisateur non connecté tente d'accéder à tout autre page qu'index, signup ou login, il est renvoyé à l'index
     if($script != "index" && $script != "login" && $script != "signup")
     {
-        header('location: login.php?error=2');
+        header('location: login.php?alert=error&num=2');
         die("Vous n'avez pas accès à cette page");
     }
 }

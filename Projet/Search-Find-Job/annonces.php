@@ -51,7 +51,7 @@ if(isset($_POST['plusAnnonces']))
 						if(isset($_GET['idU']))
 						echo "<h2>Vos offres d'emploi</h2>";
 						else
-						echo "<h2>Trouvez votre job rêvé!</h2>"
+						echo "<h2>Trouvez votre job rêvé ! ! !</h2>"
 					?>					
 				</div>
 			</div>
