@@ -6,6 +6,7 @@ require_once './php/wishlist_func.inc.php';
 if(!isset($_SESSION))
 session_start();
 
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
 if(isset($_POST['addToWishlist']))

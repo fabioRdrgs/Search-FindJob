@@ -10,19 +10,26 @@ require_once 'annonce_func.inc.php';
  */
 function GetUsers()
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT * FROM utilisateurs';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 /**
@@ -34,14 +41,18 @@ function GetUsers()
 function AddKeywords($arrayLabel)
 {
   try {
-    db()->beginTransaction();  
+    //Début de la transaction
+    db()->beginTransaction();
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;
     $sql = 'INSERT INTO `keywords` (`label`) VALUES (:LABEL)';
-  
+
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
       $ps = db()->prepare($sql);
     }
 
+    //Exécute et assigne le label pour chaque labels dans l'array
     foreach($arrayLabel as $label)
     {
       if(!empty($label))
@@ -50,12 +61,16 @@ function AddKeywords($arrayLabel)
         $ps->execute();
       }
     }
+
+    //Termine la transaction en la committant
     db()->commit();
     return true;
   } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
   catch (PDOException $e) 
   {
       db()->rollBack();
+      echo $e->getMessage();
       return false;
   }
 }
@@ -71,26 +86,32 @@ function UpdateKeywords($arrayIdKeyword,$arrayLabelKeyword)
 {
  
   try {
+    //Début de la transaction
     db()->beginTransaction();  
-    static $ps = null;
 
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
+    static $ps = null;
     $sql = "UPDATE `keywords` SET `label` = :LABEL WHERE (`id` = :IDKEYWORD)";
+
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
       $ps = db()->prepare($sql);
     }
-
+    //Exécute et assigne l'id du mot-clé ainsi que son label pour chaque IDs dans l'array array d'id de mots-clé
     for ($i=0; $i < count($arrayIdKeyword); $i++)
     {
       $ps->bindParam(':IDKEYWORD', $arrayIdKeyword[$i], PDO::PARAM_INT);
       $ps->bindParam(':LABEL', $arrayLabelKeyword[$i], PDO::PARAM_STR);
       $ps->execute();
     }
-    
+    //Termine la transaction en la committant
     db()->commit();
     return true;
   } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
   catch (PDOException $e) 
   {
+      echo $e->getMessage();
       db()->rollBack();
       return false;
   }
@@ -105,27 +126,32 @@ function DeleteKeywords($arrayIdKeyword)
 {
  
   try {
+    //Début de la transaction
     db()->beginTransaction();  
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;
     $sql = "DELETE FROM `keywords` WHERE (`id` = :IDKEYWORD);";
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
       $ps = db()->prepare($sql);
     }
-
+    //Exécute et assigne l'id du mot-clé pour chaque IDs dans l'array array d'id de mots-clé
     foreach($arrayIdKeyword as $idKeyword)
     {
       $ps->bindParam(':IDKEYWORD', $idKeyword, PDO::PARAM_INT);
       $ps->execute();
     }
-  
+    //Termine la transaction en la committant
     db()->commit();
     return true; 
   }
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
   catch (PDOException $e) 
-    {
+  {
+        echo $e->getMessage();
         db()->rollBack();
         return false;
-    }
+  }
 }
 /**
  * Permet de mettre à jour les informations des utilisateurs fournis
@@ -138,14 +164,16 @@ function DeleteKeywords($arrayIdKeyword)
 function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
 { 
     try {       
+        //Début de la transaction
         db()->beginTransaction();  
+        //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
         static $psType = null;
         $sqlType = 'UPDATE `utilisateurs` SET type = :TYPE WHERE id = :IDUTILISATEUR';
-    
+        //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
         if ($psType == null) {
         $psType = db()->prepare($sqlType);
         }
-
+        //Va s'assurer que le type fournit n'est pas vide et va ensuite assigner l'id utilisateur et le type avant de l'exécuter
         for ($i=0; $i < count($idUtilisateurArray); $i++)
         { 
           if(!empty($typeArray[$i]))
@@ -155,14 +183,14 @@ function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
               $psType->execute();          
           }   
         }
-
-
+        //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
         static $psPassword = null;
         $sqlPassword = 'UPDATE `utilisateurs` SET password = :PASSWORD WHERE id = :IDUTILISATEUR';
+        //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
         if ($psPassword == null) {
             $psPassword = db()->prepare($sqlPassword);
         }
-
+        //Va s'assurer que le mot de passe fournit n'est pas vide et va ensuite assigner l'id utilisateur et le mot de passe avant de l'exécuter
         for ($i=0; $i < count($idUtilisateurArray); $i++)
         { 
           if(!empty($passwordArray[$i]))
@@ -172,12 +200,14 @@ function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
               $psPassword->execute();            
           }  
         }    
-
+        //Termine la transaction en la committant
         db()->commit();
         return true;
-    } 
+    }
+    //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false  
     catch (PDOException $e) 
     {
+        echo $e->getMessage();
         db()->rollBack();
         return false;
     }
@@ -190,25 +220,29 @@ function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
  */
 function IsEveryGivenIndexInDB($idArray)
 {
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;
     $sql = 'SELECT * FROM utilisateurs WHERE id=:IDUTILISATEUR';
-  
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
       $ps = db()->prepare($sql);
     }
     $answer = true;
     try {
-      db()->beginTransaction(); 
-
+      //Va assigner l'id utilisateur à chaque fois pour l'id en question et l'exécuter et affecter false à la réponse si aucun résultat n'est fournit
         foreach($idArray as $id)
         {
             $ps->bindParam(':IDUTILISATEUR',$id,PDO::PARAM_INT);
             if ($ps->execute() && $ps->rowCount() == 0)
                 $answer=false;
         }
-    } catch (PDOException $e) {
+
+    }
+    //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false   
+    catch (PDOException $e) {
       echo $e->getMessage();
     }
+    //Renvoie le résultat de la requête une fois terminé
     return $answer;
 }
 // PHP
@@ -222,7 +256,9 @@ function IsEveryGivenIndexInDB($idArray)
  */
 function CreateAllTypeSelect($userType)
 {
+  //Récupère tous les types existant dans la base de donnée
   $typeList = $GLOBALS['typeList'];
+  //Affecte à la variable tout le contenu HTML voulu
   $select="";
   $select.="<select required name=\"type[]\">";
         $select.="<option disabled selected value> -- Veuillez sélectionner une option -- </option>";
@@ -235,6 +271,7 @@ function CreateAllTypeSelect($userType)
           $select.= "<option value=\"$type\">$type</option>"; 
         }
         $select.="</select>";
+  //Retourne le contenu HTML du select multiple
   return  $select;
 }
 /**
@@ -245,12 +282,15 @@ function CreateAllTypeSelect($userType)
  */
 function IsEveryGivenTypeInDB($typeArray)
 {
+    //Récupère tous les types existant dans la base de donnée
     $typeList = $GLOBALS['typeList'];
+    //Teste si le type actuel dans la liste est dans les types existant, retourne false si ce n'est pas le cas 
     foreach($typeArray as $type)
     {
         if(!in_array($type,$typeList))
         return false;
     }
+    //Sinon, retourne true si tous les types sont dans la base de donnée
     return true;
 }
 
@@ -261,7 +301,9 @@ function IsEveryGivenTypeInDB($typeArray)
  */
 function ShowUserManagement()
 {
+    //Récupère tous les utilisateurs
     $users = GetUsers();
+    //Affecte à la variable tout le contenu HTML voulu
     $table="";
     $table.="<table  id=\"tableUsers\" class=\"table table-bordered table-striped mb-0\">";
     $table.="  <thead>";
@@ -273,6 +315,7 @@ function ShowUserManagement()
     $table.="       </tr>";    
     $table.="  </thead>";
     $table.="  <tbody>";
+    //Affecte à la variable chaque utilisateurs et ses infos
     foreach($users as $user)
     {
         $table.="   <tr>";
@@ -284,8 +327,9 @@ function ShowUserManagement()
         $table.="       <td><input class=\"form-control input-lg\" name=\"passwordUser[]\" type=\"password\" placeholder=\"Nouveau mot de passe\"/></td>";
         $table.="   </tr>";
     }      
-      $table.=" </tbody>";
+    $table.=" </tbody>";
     $table.=" </table>";
+    //Echo la variable contenant le contenu HTML
     echo $table;
 }
 /**
@@ -295,7 +339,9 @@ function ShowUserManagement()
  */
 function ShowKeywordManagement()
 {
+    //Récupère tous le Mots-Clés dans la Base de données
     $keywords = GetKeywords();
+    //Affecte à la variable tout le contenu HTML voulu
     $table="";
     $table.=" <div class=\"row\">";
     $table.="<div class=\"col-md-9\">";
@@ -309,6 +355,7 @@ function ShowKeywordManagement()
     $table.="       </tr>";    
     $table.="  </thead>";
     $table.="  <tbody>";
+    //Affecte à la variable chaque Mot-Clé et ses infos
     foreach($keywords as $keyword)
     {
         $table.="   <tr>";
@@ -342,6 +389,6 @@ function ShowKeywordManagement()
     $table.="</div>";
   
 
-    
+    //Echo la variable contenant le contenu HTML
     echo $table;
 }

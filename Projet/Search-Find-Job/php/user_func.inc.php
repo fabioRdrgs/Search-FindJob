@@ -1,10 +1,5 @@
 <?php 
-  $GLOBALS['typeList'] = ['Admin', 'Chercheur', 'Annonceur'];
-  $email = filter_input(INPUT_POST,'email',FILTER_VALIDATE_EMAIL);
-  $password = filter_input(INPUT_POST,'password', FILTER_SANITIZE_STRING);
-  $passwordVer = filter_input(INPUT_POST,'passwordVerify',FILTER_SANITIZE_STRING);
-  $type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
-
+$GLOBALS['typeList'] = ['Admin', 'Chercheur', 'Annonceur'];
 require_once "./php/db.inc.php";
 /**
  * Récupère les informations de l'utilisateur
@@ -14,9 +9,11 @@ require_once "./php/db.inc.php";
  */
 function GetUserInfo($email)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
-
   $sql = "SELECT id, login, type, password FROM `utilisateurs` WHERE login = :EMAIL";
+
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if($ps == null)
   {
     $ps = db()->prepare($sql);
@@ -25,15 +22,19 @@ function GetUserInfo($email)
   $answer = false;
   try
   {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(':EMAIL', $email, PDO::PARAM_STR);
+    //Si la requête réussi sans soucis, fetch le résultat dans $answer
     if ($ps->execute())
     $answer = $ps->fetch(PDO::FETCH_NUM);
   } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false   
   catch (PDOException $e) 
   { 
     echo $e->getMessage();
   }
-return $answer;
+  //Renvoie le résultat de la requête une fois terminé
+   return $answer;
 }
 /**
  * Permet de créer un nouvel utilisateur
@@ -45,22 +46,30 @@ return $answer;
  */
 function CreateUser($email, $password,$type)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = "INSERT INTO `utilisateurs` (`login`, `password`,`type`) ";
   $sql .= "VALUES (:EMAIL, :PASSWORD,:TYPE)";
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(':EMAIL', $email, PDO::PARAM_STR);
     $ps->bindParam(':PASSWORD', $password, PDO::PARAM_STR);
     $ps->bindParam(':TYPE', $type, PDO::PARAM_STR);
+    //Si la requête réussi sans soucis, fetch le résultat dans $answer
     if($ps->execute())
     $answer = true;
-  } catch (PDOException $e) {
+  } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false   
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 /**
@@ -71,22 +80,27 @@ function CreateUser($email, $password,$type)
  */
 function VerifyIfMailExists($email)
 {
-    
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT login FROM `utilisateurs` WHERE login = :EMAIL';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(':EMAIL', $email, PDO::PARAM_STR);
-
+    //Si la requête réussi sans soucis et qu'il y a plus de 0 lignes retournées, assigne true à la variable $answer
     if ($ps->execute() && $ps->rowCount() > 0)
       $answer = true;
-  } catch (PDOException $e) {
+  } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false   
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 // PHP
@@ -99,15 +113,19 @@ function VerifyIfMailExists($email)
  */
 function ShowTypeSelect()
 {
+  //Récupère les types se trouvant dans la base de donnée
   $typeList = $GLOBALS['typeList'];
-  echo"<select required name=\"type\" class=\"form-control input-lg\">
-  <option disabled selected value> -- Veuillez sélectionner une option -- </option>";
+  $selectType="";
+  $selectType.="<select required name=\"type\" class=\"form-control input-lg\">";
+  $selectType.="<option disabled selected value> -- Veuillez sélectionner une option -- </option>";
+  //Affiche tous les types sauf admin
   foreach($typeList as $type)
   {
     if($type != 'Admin')
-    echo "<option value=\"$type\">$type</option>"; 
+    $selectType.="<option value=\"$type\">$type</option>"; 
   }
-  echo"</select>";
+  $selectType.="</select>";
+  echo $selectType;
 }
 /**
  * Va tenter de connecter l'utilisateur si tous les tests sont valides
@@ -118,9 +136,12 @@ function ShowTypeSelect()
  */
 function ConnectUser($email, $password)
 {
+  //Vérifie si l'email existe
   if(VerifyIfMailExists($email) != null)
   {
-    $infoUser = GetUserInfo($email);
+   //Récupère les infos de l'utilisateur et vérifie son mot de passe
+   $infoUser = GetUserInfo($email);
+   //Si le mot de passe est correct, définit l'utilisateur comme connecté et assigne ses différentes informations en session et retourne true
    if(password_verify($password,$infoUser[3]))
     {
       ChangeLoginState(true);
@@ -131,6 +152,7 @@ function ConnectUser($email, $password)
       return true;
     }  
   }
+  //Sinon retourne false si l'utilisateur ne s'est pas connecté 
   return false;
 }
 /**
@@ -141,12 +163,12 @@ function ConnectUser($email, $password)
  */
 function ChangeLoginState($state)
 {
-$_SESSION['user']['loggedIn'] = $state;
+  $_SESSION['user']['loggedIn'] = $state;
 }
 /**
  * Permet de récupérer le type de l'utilisateur connecté
  *
- * @return string/null Renvoie le type sous forme de string de l'utilisateur, sinon renvoie null
+ * @return string/null Retourne le type sous forme de string de l'utilisateur, sinon renvoie null
  */
 function GetUserType()
 {
@@ -158,7 +180,7 @@ function GetUserType()
 /**
  * Permet de récupérer l'ID de l'utilisateur
  *
- * @return void
+ * @return int/null Retourne l'id s'il est connecté ou retourne null
  */
 function GetUserId()
 {
@@ -189,16 +211,22 @@ function IsUserLoggedIn()
  */
 function RegisterUser($email,$password,$type)
 {
+  //Vérifie si l'email n'existe pas déjà
   if(VerifyIfMailExists($email) == null || VerifyIfMailExists($email) == false)
   {
+    //Hash le mot de passe
     $hashedPassword = password_hash($password,PASSWORD_DEFAULT);
+    //Si l'utilisateur a bien été créé, retourne true après avoir connecté l'utilisateur et assigné ses différentes informations
     if(CreateUser($email,$hashedPassword,$type))
-    ChangeLoginState(true);
-    $infoUser = GetUserInfo($email);
-    $_SESSION['user']['id'] = $infoUser[0];
-    $_SESSION['user']['login'] = $infoUser[1];
-    $_SESSION['user']['type'] = $infoUser[2];
-    return true;
+    {
+      ChangeLoginState(true);
+      $infoUser = GetUserInfo($email);
+      $_SESSION['user']['id'] = $infoUser[0];
+      $_SESSION['user']['login'] = $infoUser[1];
+      $_SESSION['user']['type'] = $infoUser[2];
+      return true;
+    }
   }
+  //Retourne false s'il n'a pas réussi à s'inscrire
   return false;
 }

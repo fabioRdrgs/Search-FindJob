@@ -4,77 +4,50 @@ require_once "./php/pageAccess.inc.php";
 require_once './php/alert.inc.php';
 require_once './php/nav.inc.php';
 
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
+
 $nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
 $dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);
 $dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 
-
-if(!isset($_SESSION))
-{
-session_start();
-}
-
-
-$_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
-if(!IsUserLoggedIn())
-ChangeLoginState(false);
-
-
 if(isset($_POST['creer']))
 {
 	//Teste si tous les champs sont remplis, sinon affiche une erreur
 	if(!empty($nomAnnonce) && !empty($description) && !empty($dateDebut) && !empty($dateFin) && isset($motsClesSelectPost))
 	{
-		//Si un fichier est fournit (Image ou PDF)
-		if($_FILES["media"]['error'] == 0)
+		//Prépare le média fournit à l'upload
+		$media = CheckMedia();
+		//Si aucune erreur n'est survenue, procède à la création de l'annonce
+		if(GetAlert()[1]!= "error")
 		{
-			//Si le fichier fourni est plus petit que 20Mo
-			if($_FILES["media"]["size"]<=20000000)
-			{
-				$Orgfilename = $_FILES["media"]["name"];
-				$filename = uniqid();
-				$dir = "./tmp/";
-				$type = explode("/",$_FILES["media"]["type"])[1];
-				$file = $filename.'.'.$type;
-
-				if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
-				{		
-					SetAlert("error",8); 
-				}
-				else
-				{
-					$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());					
-				}
-			}
-		}
-		else
-		{
-			$type = null;
-			$dir = null;
-			$filename = null;
-
+			$dir = $media[0];
+			$filename = $media[1];
+			$type = $media[2];
 			$createAnnonceResult = CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,GetUserId());
-
 		}
-
+		//Si la création de l'annonce a été effectuée avec succès, procède vers l'upload du média si fournit
 		if(isset($createAnnonceResult) && $createAnnonceResult)
 		{
+			//Va effectuer l'upload du média sur le serveur si un média a été fournit
 			if($_FILES["media"]['error'] == 0)
 			{
-				//Si l'upload de l'image réussi, redirige vers la page mes annonces, sinon affiche une erreur
-				if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type))
-				{  
+				//Si l'upload a été effectué avec succès, renvoie à la page d'annonces, sinon, affiche une erreur
+				if(UploadMedia($dir,$filename,$type))
+				{
 					header('location: annonces.php?idU='.GetUserId());
-				}  
+				}
 				else
 				SetAlert("error",5);
 			}
+			//Sinon, effectue une simple redirection
 			else
 			header('location: annonces.php?idU='.GetUserId());
-		}		
+		}	
+		else
+		SetAlert("error",19);	
 	}
 	else
 	SetAlert("error",6);
@@ -85,7 +58,7 @@ if(isset($_POST['creer']))
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Créer une offre d'emploi</title>
+        <title>Créer une annonce | Search & Find Job</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>

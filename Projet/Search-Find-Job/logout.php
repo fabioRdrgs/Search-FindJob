@@ -1,7 +1,6 @@
 <?php
 require_once './php/user_func.inc.php';
-if(!isset($_SESSION))
-session_start();
+require_once './php/pageAccess.inc.php';
 
 if(IsUserLoggedIn())
 {

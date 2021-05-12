@@ -7,13 +7,13 @@ require_once './php/alert.inc.php';
 require_once './php/user_func.inc.php';
 require_once './php/nav.inc.php';
 require_once './php/pageAccess.inc.php';
+//Variables
+$email = filter_input(INPUT_POST,'email',FILTER_VALIDATE_EMAIL);
+$password = filter_input(INPUT_POST,'password', FILTER_SANITIZE_STRING);
+
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
-//Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
-
-$_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
 //Lorsque l'utilisateur appuie sur se connecter
 if(isset($_POST['login']))
 //Teste si tous les champs sont remplis, sinon affiche une erreur
@@ -32,7 +32,7 @@ if(!ConnectUser($email,$password))
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>EmployMe | Se connecter</title>
+        <title>Se connecter | Search & Find Job</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>

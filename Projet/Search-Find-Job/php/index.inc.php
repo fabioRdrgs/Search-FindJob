@@ -3,8 +3,10 @@ require_once "user_func.inc.php";
 
 $features = "";
 $features.= "<section class=\"features\">";
+//S'assure que l'utilisateur est connecté pour montrer les vues adéquates
 if(IsUserLoggedIn())
 {
+    //Affiche la vue d'accueil pour l'annonceur
     if(GetUserType()=="Annonceur")
     {
         $features.="<a href=\"creer-annonce.php\">";
@@ -32,6 +34,7 @@ if(IsUserLoggedIn())
         $features.=     "</div>";
 
     }
+    //Affiche la vue d'accueil pour le chercheur
     else if (GetUserType() =="Chercheur")
     {
        
@@ -59,6 +62,7 @@ if(IsUserLoggedIn())
         $features.=     "</div>";
 
     }
+    //Affiche la vue d'accueil pour l'admin
     else if(GetUserType()=="Admin")
     {
         $features.="<a href=\"administration.php?gestion=utilisateurs\">";
@@ -87,6 +91,7 @@ if(IsUserLoggedIn())
        
     }
 }
+//Sinon affiche une vue pour tous les utilisateurs non-connectés
 else
 {
     $features.=     "<div class=\"container\">";
@@ -112,4 +117,5 @@ else
 
 }
 $features.= "</section>";
+//Echo le contenu HTML de l'accueil
 echo $features;

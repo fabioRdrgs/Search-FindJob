@@ -1,9 +1,9 @@
 <?php
-// Nom de la page chargée (sans l'extension)
-
 require_once './php/user_func.inc.php';
 require_once './php/alert.inc.php';
+// Nom de la page chargée (sans l'extension)
 $script = basename($_SERVER['SCRIPT_NAME'], '.php');
+//S'assure que la session soit démarrée à chaque fois
 if(!isset($_SESSION))
 {
 session_start();
@@ -16,25 +16,35 @@ ChangeLoginState(false);
 //Si on est connecté, accède les tests de d'accès de page correspondant à l'état connecté de l'utilisateur
  if(IsUserLoggedIn())
 {
+    //Si l'utilisateur est connecté, il n'aura pas accès aux pages de connexion ou d'inscription
     if ($script == 'login' || $script == "signup")
     {
         header('location: index.php');
         die("Vous n'avez pas accès à cette page");
     }
     else
+    //Si l'utilisateur est un annonceur
     if(GetUserType() == "Annonceur")
     {
-        if($script != "annonces" && $script != "creer-annonce" && $script != "index" && $script != "annonce" && $script != "modifier-annonce" && $script != "supprimer-annonce")
+        //Il ne pourra aller que sur les pages "annonces","creer-annonce","index","annonce","modifier-annonce" et supprimer-annonce
+        if($script != "annonces" && $script != "creer-annonce" && $script != "index" && $script != "annonce" && $script != "modifier-annonce" && $script != "supprimer-annonce" && $script != 'logout')
         {
             header('location: index.php?error=7');
             die("Vous n'avez pas accès à cette page");
         }
-        if($script =="annonces" && !isset($_GET['idU']))
+        //Il ne pourra pas aller sur la page annonces si l'id utilisateur n'est pas fournit en GET ou
+        //que l'id ne correspond pas à son id
+        if($script =="annonces")
         {
-            header('location: annonces.php?idU='.GetUserId());
-            die("Vous n'avez pas accès à cette page");
+            if(!isset($_GET['idU'])|| $_GET['idU'] != GetUserId())
+            {
+                header('location: annonces.php?idU='.GetUserId());
+                die("Vous n'avez pas accès à cette page");
+            }
+            
         }
-
+        //Il ne pourra pas aller sur la page supprimer annonce si l'id utilisateur n'est pas fournit en GET, 
+        //qu'il ne correspond pas à l'id de l'utilisateur ou que l'id de l'annonce ne soit pas définie en GET
         if($script == "supprimer-annonce")
         {
             if(!isset($_GET['idU']) || $_GET['idU'] != GetUserId() || !isset($_GET['idA']))
@@ -45,33 +55,43 @@ ChangeLoginState(false);
         }
     }
     else
+    //Si l'utilisateur est un chercheur
     if(GetUserType() == "Chercheur")
     {
-        if($script != "annonces" && $script != "annonce" && $script != "index" && $script != "wishlist" && $script != "index")
+        //Il ne pourra aller que sur les pages "annonces","annonce","index" et "wishlist"
+        if($script != "annonces" && $script != "annonce" && $script != "index" && $script != "wishlist" && $script != 'logout')
         {
             header('location: index.php?error=7');
             die("Vous n'avez pas accès à cette page");
         }
-        if($script == "wishlist" && !isset($_GET['idU']))
+        //Il ne pourra pas aller sur la page wishlist si l'id utilisateur n'est pas fournit en GET
+        if($script == "wishlist" )
         {
-            header('location: wishlist.php?idU='.GetUserId());
-            die("Vous n'avez pas accès à cette page");
+            if(!isset($_GET['idU']) || $_GET['idU'] != GetUserId())
+            {
+                header('location: wishlist.php?idU='.GetUserId());
+                die("Vous n'avez pas accès à cette page");
+            }
         }
     }
     else
+    //Si l'utilisateur est un admin
     if(GetUserType() == "Admin")
     {
-        if($script != "administration" && $script != "index")
+        //Il ne pourra pas aller que sur les pages "administration" et "index"
+        if($script != "administration" && $script != "index" && $script != 'logout')
         {
             header('location: index.php');
             die("Vous n'avez pas accès à cette page");
         }
+        //Il ne pourra aller sur la page administration si le type de gestion n'est pas fournit en GET
         if($script == "administration" && !isset($_GET['gestion']))
         {
             header('location: index.php');
             die("Vous n'avez pas accès à cette page");
         }
     }
+    //Aucun utilisateur ne pourra aller sur la page annonce si l'id de l'annonce n'est pas fournit en GET
     if($script == "annonce" && !isset($_GET['idA']))
     {
         header('location: index.php');

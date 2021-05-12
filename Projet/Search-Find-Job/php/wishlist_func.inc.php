@@ -11,21 +11,29 @@
  */
 function HasUserAddedAnnonceToWishlist($idAnnonce,$idUtilisateur)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT * FROM `wishlists` WHERE annonces_id = :IDANNONCE AND utilisateurs_id = :IDUTILISATEUR';
-
+   
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
     $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
+    //Si la requête réussi sans soucis et qu'il y a plus de 0 lignes retournées, assigne true à la variable $answer
     if ($ps->execute() && $ps->rowCount() > 0)
       $answer = true;
-  } catch (PDOException $e) {
+  } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 /**
@@ -37,21 +45,28 @@ function HasUserAddedAnnonceToWishlist($idAnnonce,$idUtilisateur)
  */
 function AddToUserWishlist($idAnnonce,$idUtilisateur)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'INSERT INTO `wishlists` (`annonces_id`,`utilisateurs_id`) VALUES (:IDANNONCE,:IDUTILISATEUR)';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
     $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
+    //Si la requête réussi sans soucis et qu'il y a plus de 0 lignes retournées, assigne true à la variable $answer
     if ($ps->execute())
       $answer = true;
-  } catch (PDOException $e) {
+  } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 /**
@@ -63,21 +78,29 @@ function AddToUserWishlist($idAnnonce,$idUtilisateur)
  */
 function GetWishlistForUser($idUtilisateur,$limit)
 {
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;
     $sql = 'SELECT * FROM `wishlists` JOIN `annonces` ON (wishlists.annonces_id = annonces.id)WHERE wishlists.utilisateurs_id = :IDUTILISATEUR LIMIT :LIMIT';
   
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
       $ps = db()->prepare($sql);
     }
     $answer = false;
     try {
+      //Affecte tous les paramètres avec la variable correspondante
       $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
       $ps->bindParam(":LIMIT",$limit,PDO::PARAM_INT);
+      //Si la requête réussi sans soucis et qu'il y a plus de 0 lignes retournées, assigne true à la variable $answer
       if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-    } catch (PDOException $e) {
+    } 
+    //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
+    catch (PDOException $e) 
+    {
       echo $e->getMessage();
     }
+    //Renvoie le résultat de la requête une fois terminé
     return $answer;
 }
 /**
@@ -89,21 +112,29 @@ function GetWishlistForUser($idUtilisateur,$limit)
  */
 function RemoveWish($idUtilisateur,$idAnnonce)
 {
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;
     $sql = 'DELETE FROM `wishlists` where utilisateurs_id = :IDUTILISATEUR AND annonces_id = :IDANNONCE';
   
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($ps == null) {
       $ps = db()->prepare($sql);
     }
     $answer = false;
     try {
+      //Affecte tous les paramètres avec la variable correspondante
       $ps->bindParam(":IDUTILISATEUR",$idUtilisateur,PDO::PARAM_INT);
       $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+      //Si la requête réussi sans soucis et qu'il y a plus de 0 lignes retournées, assigne true à la variable $answer
       if ($ps->execute() && $ps->rowCount() > 0)
       $answer = true;
-    } catch (PDOException $e) {
+    } 
+    //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false 
+    catch (PDOException $e) 
+    {
       echo $e->getMessage();
     }
+    //Renvoie le résultat de la requête une fois terminé
     return $answer;
 }
 
@@ -119,14 +150,16 @@ function RemoveWish($idUtilisateur,$idAnnonce)
  */
 function ShowWishlist($idUtilisateur,$limit)
 {
+  //Récupère toutes les annonces suivies par l'utilisateur en question
   $wishes = GetWishlistForUser($idUtilisateur,$limit);
+  //Si l'utilisateur suit des annonces, les affiche
 	if($wishes != false)
     {
         foreach($wishes as $wish)
         {
             $affichageAnnonce = "";
-            $affichageAnnonce .="<a href=\"annonce.php?idA=".$wish[3]."\">
-            <div class=\"company-list\">";
+            $affichageAnnonce .="<a href=\"annonce.php?idA=".$wish[3]."\">";
+            $affichageAnnonce .="<div class=\"company-list\">";
             $affichageAnnonce .= "	<div class=\"row\">";
             $affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
             $affichageAnnonce .= "			<div class=\"company-content\">";
@@ -137,9 +170,10 @@ function ShowWishlist($idUtilisateur,$limit)
             $affichageAnnonce .= "		</div>";
             $affichageAnnonce .= "	</div>";
             $affichageAnnonce .= "</div>";
-            echo $affichageAnnonce; 
         }
+        echo $affichageAnnonce; 
     }
+    //Sinon affiche un message
     else
     echo "<p style=\"text-align:center;\">Vous n'avez pas d'annonces dans votre Wishlist, ajoutez-en !</p>";
 

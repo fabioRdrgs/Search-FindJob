@@ -2,18 +2,17 @@
 require_once "./php/user_func.inc.php";
 require_once "./php/alert.inc.php";
 require_once './php/nav.inc.php';
+$email = filter_input(INPUT_POST,'email',FILTER_VALIDATE_EMAIL);
+$password = filter_input(INPUT_POST,'password', FILTER_SANITIZE_STRING);
+$passwordVer = filter_input(INPUT_POST,'passwordVerify',FILTER_SANITIZE_STRING);
+$type = filter_input(INPUT_POST,'type',FILTER_SANITIZE_STRING);
 
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
-if(!isset($_SESSION))
-{
-session_start();
-}
 
 if(!isset($_SESSION['user']['loggedIn']))
 ChangeLoginState(false);
 
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
 
 if(isset($_POST['reset']))
 {
@@ -71,7 +70,7 @@ if(isset($_POST['password']) && isset($_POST['passwordVerify']))
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-	<title>EmployMe | S'inscrire</title>
+	<title>S'inscrire | Search & Find Job</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 

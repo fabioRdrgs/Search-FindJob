@@ -4,104 +4,86 @@ require_once "./php/pageAccess.inc.php";
 require_once './php/alert.inc.php';
 require_once './php/nav.inc.php';
 
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
+
 $nomAnnonce = filter_input(INPUT_POST,'nomAnnonce',FILTER_SANITIZE_STRING);
 $description = filter_input(INPUT_POST,'description',FILTER_SANITIZE_STRING);
 $dateDebut = filter_input(INPUT_POST,'dateDebut',FILTER_SANITIZE_STRING);
 $dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 $supprimerMediaActuel = filter_input(INPUT_POST,'enleverMedia');
-if(!isset($_SESSION))
+
+if(isset($_GET['idA']))
 {
-session_start();
+	$annonceInfoOld = GetAnnonceInfo($_GET['idA']);
+	$motsClesOld = GetKeywordsByIdAnnonce($_GET['idA']);
 }
-if(!IsUserLoggedIn())
-ChangeLoginState(false);
-
-$_SESSION['currentPage'] = pathinfo(__FILE__,PATHINFO_FILENAME);
-$annonceInfoOld = GetAnnonceInfo($_GET['idA']);
-$motsClesOld = GetKeywordsByIdAnnonce($_GET['idA']);
-
 
 if(isset($_POST['update']))
 {
-	
-	
 	//Teste si tous les champs sont remplis, sinon affiche une erreur
 	if(!empty($nomAnnonce) && !empty($description) && !empty($dateDebut) && !empty($dateFin) && isset($motsClesSelectPost))
 	{
-		//Si un fichier est fournit (Image ou PDF)
-		if($_FILES["media"]['error'] == 0)
-		{
-			//Si le fichier fourni est plus petit que 20Mo
-			if($_FILES["media"]["size"]<=20000000)
-			{
-				$Orgfilename = $_FILES["media"]["name"];
-				$filename = uniqid();
-				$dir = "./tmp/";
-				$type = explode("/",$_FILES["media"]["type"])[1];
-				$file = $filename.'.'.$type;
-
-				if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
-				{		
-					SetAlert("error",8); 
-				}				
-			}
-		}
-		else
-		{
-			$dir = null;
-			$filename = null;
-			$type = null;
-		}
-
+			$media = CheckMedia();
+			
+			//Définit comme false le fait qu'aucun mot-clé n'a été modifié
 			$motsClesChange = false;
 			$motsClesIdArrayOld= [];
+			//Récupère les id de tous les mots-clés actuels
 			foreach ($motsClesOld as $motsCleOld) 
 			{
 				array_push($motsClesIdArrayOld,$motsCleOld[0]);
 			}
-			for ($i=0; $i < count($motsClesIdArrayOld); $i++) 
-			{ 
-				if(!in_array($motsClesSelectPost[$i],$motsClesIdArrayOld))
-				$motsClesChange = true;
-			}
+			//Array contenant tous les ID qui ne sont pas pareils dans les array contenant les nouveaux et anciens mots-clés	
+			$differenceMotsCles = array_merge(array_diff($motsClesSelectPost,$motsClesIdArrayOld),array_diff($motsClesIdArrayOld,$motsClesSelectPost));
 
-			if(empty(GetAlert()))
+			//S'il n'y a pas d'erreur, procède à la mise à jour de l'annonce
+			if(GetAlert()[1] != "error")
 			{
-				if($supprimerMediaActuel ||$nomAnnonce != $annonceInfoOld[4] || $description != $annonceInfoOld[5] || $dateDebut != $annonceInfoOld[1] || $dateFin != $annonceInfoOld[2] || $motsClesChange || !empty($dir) || !empty($filename) || !empty($type))
+				$dir = $media[0];
+				$filename = $media[1];
+				$type = $media[2];
+				//Si quelconque changement est opéré, procède à la mise à jour
+				if($supprimerMediaActuel ||$nomAnnonce != $annonceInfoOld[4] || $description != $annonceInfoOld[5] || $dateDebut != $annonceInfoOld[1] || $dateFin != $annonceInfoOld[2] || !empty($differenceMotsCles) || !empty($dir) || !empty($filename) || !empty($type))
 				{
-					if(!$motsClesChange)
+					//Si aucun changement de mot-clé a été effectué, défini l'array de mots-clés à update à null afin de ne pas mettre à jour les mots-clés
+					if(empty($differenceMotsCles))
 					$motsClesSelectPost = null;
 
+					//Si la checkbox de "Supprimer média actuel" n'est pas cochée, définit la variable à null afin de ne pas supprimer le média actuel
 					if(!isset($supprimerMediaActuel))					
 						$supprimerMediaActuel = null;					
 					
+					//Mets à jour l'annonce et récupère le résultat de la requête
 					$updateAnnonceResult = UpdateAnnonce($_GET['idA'],$nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,$supprimerMediaActuel);					
+					//Si la checkbox a été cochée pour supprimer le média actuel, supprime le média du serveur
+					if(!is_null($supprimerMediaActuel))		
+					unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
+					//Si la mise à jour a bien été effectuée et qu'aucun nouveau média n'a été fourni, procède à l'upload sur le serveur de l'image
 					if($updateAnnonceResult && !empty($dir) && !empty($filename) && !empty($type))
 					{
-						if(!is_null($supprimerMediaActuel))		
-						unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
-
 						if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type))
 						header('location: annonces.php?idU='.GetUserId());
+						//Si l'upload n'a pas réussi, affiche une erreur
 						else
 						SetAlert("error",5);
 					}
+					//Si la mise à jour a été faite mais qu'aucun nouveau média n'a été fourni, redirige simplement vers annonces
 					else if($updateAnnonceResult)
-					{
 						header('location: annonces.php?idU='.GetUserId());
-						if(!is_null($supprimerMediaActuel))		
-						unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
-					}
+					//Si la mise à jour n'a pas été effectuée, affiche une erreur
 					else
 					SetAlert("error",11);
 				}	
 			}							
 	}
+	else
+	SetAlert("error",6);
 }
 else
 {
+	//Permet de récupérer les informations de l'annonce en question pour modification
 	if(isset($_GET['idA']))
 	{		
 		$nomAnnonce = $annonceInfoOld[4];
@@ -123,7 +105,7 @@ else
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Créer une offre d'emploi</title>
+        <title>Modifier une annonce | Search & Find Job</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>

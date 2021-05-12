@@ -5,11 +5,9 @@ require_once './php/alert.inc.php';
 require_once './php/pageAccess.inc.php';
 $rechercheAnnonce = filter_input(INPUT_POST,'rechercheAnnonce',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
-if(!isset($_SESSION))
-session_start();
+
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
 
 if(!isset($_GET['limit']))
 $_GET['limit'] = 1;

@@ -15,11 +15,13 @@ $deleteKeywordCheckboxPost = filter_input(INPUT_POST,'deleteCheckbox',FILTER_SAN
 //Initialisation
 if(!isset($_SESSION))
 session_start();
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
+
 if(!isset($_GET['limit']))
 $_GET['limit'] = 1;
+
+//Si l'utilisateur appuie sur Plus D'annonces, incrémente la limite tout en lançant la même recherche actuelle
 if(isset($_POST['plusAnnonces']))
 {
 	$_GET['limit']++;

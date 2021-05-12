@@ -6,9 +6,8 @@ require_once './php/pageAccess.inc.php';
 
 if(!isset($_SESSION))
 session_start();
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
 
 if(!isset($_GET['limit']))
 $_GET['limit'] = 1;
@@ -23,7 +22,7 @@ if(isset($_POST['plusAnnonces']))
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Jober Desk | Responsive Job Portal Template</title>
+        <title>Ma Wishlist | Search & Find Job</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		

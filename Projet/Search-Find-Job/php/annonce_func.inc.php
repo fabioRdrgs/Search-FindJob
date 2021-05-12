@@ -21,12 +21,19 @@ include_once 'wishlist_func.inc.php';
 function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$file,$type,$idUtilisateur)
 {
   try {
+    //Début de la transaction
     db()->beginTransaction();
 
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $psAnnonce = null;
+    $sqlAnnonce = "INSERT INTO `annonces` (`titre`,`description`,`date_debut`,`date_fin`,`media_path`,`media_nom`,`media_type`,`utilisateurs_id`)
+    VALUES (:TITRE,:DESCRIPTION,:DATEDEBUT,:DATEFIN,:MEDIAPATH,:MEDIANOM,:MEDIATYPE,:UTILISATEURSID)";
+
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($psAnnonce == null)
-      $psAnnonce = db()->prepare("INSERT INTO `annonces` (`titre`,`description`,`date_debut`,`date_fin`,`media_path`,`media_nom`,`media_type`,`utilisateurs_id`)
-                    VALUES (:TITRE,:DESCRIPTION,:DATEDEBUT,:DATEFIN,:MEDIAPATH,:MEDIANOM,:MEDIATYPE,:UTILISATEURSID)");
+      $psAnnonce = db()->prepare($sqlAnnonce);
+
+    //Affecte tous les paramètres avec la variable correspondante
     $psAnnonce->bindParam(':TITRE', $nomAnnonce, PDO::PARAM_STR);
     $psAnnonce->bindParam(':DESCRIPTION', $description, PDO::PARAM_STR);
     $psAnnonce->bindParam(':DATEDEBUT', $dateDebut, PDO::PARAM_STR);
@@ -37,23 +44,34 @@ function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$di
     $psAnnonce->bindParam(':UTILISATEURSID', $idUtilisateur, PDO::PARAM_INT);
     $psAnnonce->execute();
 
+    //Récupère l'id de l'annonce créée
     $annonceId = db()->lastInsertId();
 
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $psKeywords = null;
-    if($psKeywords == null)
-     $psKeywords = db()->prepare("INSERT INTO `annonces_has_keywords` (`annonces_id`,`keywords_id`) 
-     VALUES (:ANNONCESID,:KEYWORDSID)");
+    $sqlKeywords = "INSERT INTO `annonces_has_keywords` (`annonces_id`,`keywords_id`) 
+    VALUES (:ANNONCESID,:KEYWORDSID)";
 
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
+    if($psKeywords == null)
+     $psKeywords = db()->prepare($sqlKeywords);
+
+    //Exécute et assigne l'id du mot-clé ainsi que son l'id de l'annonce pour chaque IDs dans l'array array de mots-clés
      foreach($keywords as $keyword)
      {
        $psKeywords->bindParam(':ANNONCESID',$annonceId,PDO::PARAM_INT);
        $psKeywords->bindParam(':KEYWORDSID',$keyword,PDO::PARAM_INT);
        $psKeywords->execute();
-     }   
+     }  
+    //Termine la transaction en la committant 
     db()->commit();
 
     return true;
-  } catch (PDOException $e) {
+  } 
+  //Si une erreur survient, rollback le tout, echo le message d'erreur et retourne false   
+  catch (PDOException $e) 
+  {
+    echo $e;
     db()->rollBack();
     return false;
   }
@@ -67,21 +85,30 @@ function CreerAnnonce($nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$di
  */
 function DeleteAnnonce($idAnnonce, $idUser)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = "DELETE FROM `annonces` WHERE (`id` = :IDANNONCE) AND (`utilisateurs_id`=:IDUSER);";
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
+
   try {
+    //Assigne chaque paremètres et leur variable correspondante
     $ps->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
     $ps->bindParam(':IDUSER', $idUser, PDO::PARAM_INT);
     $ps->execute();
+    //Si plus de 0 annonces ont été supprimées, affecte true au résultat
     if($ps->rowCount() > 0)
     $answer = true;
-  } catch (PDOException $e) {
+  } 
+  //Si une erreur survient,  echo le message d'erreur
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 
@@ -103,15 +130,21 @@ function DeleteAnnonce($idAnnonce, $idUser)
 function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$keywords,$dir,$filename,$type, $supprimerMediaActuel)
 {
   try {
+    //Début de la transaction
     db()->beginTransaction();
-
+    //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $psAnnonce = null;
+    $sqlAnnonce = "UPDATE `annonces` SET 
+    date_debut = :DATEDEBUT, 
+    date_fin = :DATEFIN, 
+    titre = :TITRE, 
+    description = :DESCRIPTION WHERE (id = :IDANNONCE)";
+
+    //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
     if ($psAnnonce == null)
-      $psAnnonce = db()->prepare("UPDATE `annonces` SET 
-      date_debut = :DATEDEBUT, 
-      date_fin = :DATEFIN, 
-      titre = :TITRE, 
-      description = :DESCRIPTION WHERE (id = :IDANNONCE)");
+      $psAnnonce = db()->prepare($sqlAnnonce);
+
+      //Affecte tous les paramètres avec la variable correspondante
       $psAnnonce->bindParam(':TITRE', $nomAnnonce, PDO::PARAM_STR);
       $psAnnonce->bindParam(':DESCRIPTION', $description, PDO::PARAM_STR);
       $psAnnonce->bindParam(':DATEDEBUT', $dateDebut, PDO::PARAM_STR);
@@ -119,6 +152,7 @@ function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$
       $psAnnonce->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
       $psAnnonce->execute();
 
+    //S'assure que la variable supprimer média n'est pas vide, si elle n'est pas vide cela indique qu'il faut supprimer le média présent dans l'annonce actuelle
     if(!empty($supprimerMediaActuel))
     {
       static $psDeleteCurrentMedia = null;
@@ -128,31 +162,46 @@ function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$
        $psDeleteCurrentMedia->execute();
 
     }
-
+    //S'assure que les variables chemin, nom de fichier et type ne sont pas vide, si elle n'est pas vide cela indique qu'il faut affecter ces données à l'annonce actuelle
     if(!empty($dir) && !empty($filename) && !empty($type))
     {
+        //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
         static $psMedia = null;
+        $sqlMedia="UPDATE `annonces` SET media_path = :MEDIAPATH, media_nom = :MEDIANOM, media_type = :MEDIATYPE  WHERE (id = :IDANNONCE)";
+        //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
         if($psMedia == null)
-        $psMedia = db()->prepare("UPDATE `annonces` SET media_path = :MEDIAPATH, media_nom = :MEDIANOM, media_type = :MEDIATYPE  WHERE (id = :IDANNONCE)");
+        $psMedia = db()->prepare($sqlMedia);
+        //Affecte tous les paramètres avec la variable correspondante
         $psMedia->bindParam(':MEDIAPATH', $dir, PDO::PARAM_STR);
         $psMedia->bindParam(':MEDIANOM', $filename, PDO::PARAM_STR);
         $psMedia->bindParam(':MEDIATYPE', $type, PDO::PARAM_STR);
         $psMedia->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+        //Exécute la requête
         $psMedia->execute();
     }
+    //S'assure que l'array de mots-clés n'est pas vide supprimer média n'est pas vide, si elle n'est pas vide cela indique qu'il faut supprimer les mots-clés de l'annonce et insérer les nouveaux
     if(!empty($keywords))
     {
+      //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
       static $psKeywordsDelete = null;
+      $sqlKeywordsDelete="DELETE FROM `annonces_has_keywords` WHERE annonces_id = :IDANNONCE";
+      //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
       if($psKeywordsDelete == null)
-       $psKeywordsDelete = db()->prepare("DELETE FROM `annonces_has_keywords` WHERE annonces_id = :IDANNONCE");
+       $psKeywordsDelete = db()->prepare($sqlKeywordsDelete);
+       //Affecte tous les paramètres avec la variable correspondante
        $psKeywordsDelete->bindParam(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+       //Exécute la requête
        $psKeywordsDelete->execute();
-
+       //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
        static $psKeywordsAdd = null;
+       $sqlKeywordsAdd = "INSERT INTO `annonces_has_keywords` (`annonces_id`,`keywords_id`) 
+       VALUES (:ANNONCESID,:KEYWORDSID)";
+
+       //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
        if($psKeywordsAdd == null)
-        $psKeywordsAdd = db()->prepare("INSERT INTO `annonces_has_keywords` (`annonces_id`,`keywords_id`) 
-        VALUES (:ANNONCESID,:KEYWORDSID)");
-   
+        $psKeywordsAdd = db()->prepare($sqlKeywordsAdd);
+
+        //Exécute et assigne l'id du mot-clé ainsi que l'id de l'annonce pour chaque Mot-Clé dans l'array array de mots-clés
         foreach($keywords as $keyword)
         {
           $psKeywordsAdd->bindParam(':ANNONCESID',$idAnnonce,PDO::PARAM_INT);
@@ -161,7 +210,7 @@ function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$
         }   
           
     }
-   
+    //Termine la transaction en la committant 
     db()->commit();
 
     return true;
@@ -179,19 +228,25 @@ function UpdateAnnonce($idAnnonce,$nomAnnonce,$description,$dateDebut,$dateFin,$
  */
 function GetKeywords()
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT * FROM `keywords`';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 /**
@@ -202,20 +257,28 @@ function GetKeywords()
  */
 function GetKeywordsByIdAnnonce($idAnnonce)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT keywords.id, keywords.label FROM `keywords` JOIN `annonces_has_keywords` ON (keywords.id = annonces_has_keywords.keywords_id) WHERE annonces_has_keywords.annonces_id = :IDANNONCE';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindValue(':IDANNONCE', $idAnnonce, PDO::PARAM_INT);
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e) 
+  {
+    //Si une erreur survient,  echo le message d'erreur
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 
@@ -227,20 +290,27 @@ function GetKeywordsByIdAnnonce($idAnnonce)
  */
 function GetAnnonceInfo($idAnnonce)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT * FROM `annonces` WHERE id = :IDANNONCE';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetch(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 /**
@@ -251,20 +321,27 @@ function GetAnnonceInfo($idAnnonce)
  */
 function GetFollowersByIdAnnonce($idAnnonce)
 {
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
   $sql = 'SELECT utilisateurs.login, wishlists.date FROM `annonces` JOIN `wishlists` ON (annonces.id = wishlists.annonces_id) JOIN `utilisateurs` ON (wishlists.utilisateurs_id = utilisateurs.id) WHERE annonces.id = :IDANNONCE';
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindParam(":IDANNONCE",$idAnnonce,PDO::PARAM_INT);
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e)
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 
@@ -278,13 +355,14 @@ function GetFollowersByIdAnnonce($idAnnonce)
  */
 function GetAnnoncesFromSearchChercheur($recherche,$motsClesSelect,$limit)
 {
+  //Teste si des mots-clés ont été fournis, si oui, affecte le compte de mots-clés à la variable sinon affecte 0
   if(empty($motsClesSelect))
   $countKeywords = 0;
   else
   $countKeywords = count($motsClesSelect);
 
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
-
   //Pour chaque paramètres, s'il est fournit => le teste, sinon, ne le teste pas ({PARAMÈTRE} IS NULL OR [CONDITION] = {PARAMÈTRE})
   $sql = "SELECT DISTINCT annonces.*
   FROM annonces 
@@ -294,19 +372,20 @@ function GetAnnoncesFromSearchChercheur($recherche,$motsClesSelect,$limit)
   OR description LIKE :RECHERCHE) 
   AND date_debut <= CURRENT_DATE AND date_fin >= CURRENT_DATE ";
 
-for ($i=0; $i < $countKeywords; $i++) 
-{ 
-  if($i == 0)
-  $sql.= "AND ((:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
-  else
-  $sql.= " OR (:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
+  //Va ajouter autant de test qu'il y a de mots-clés à la requête
+  for ($i=0; $i < $countKeywords; $i++) 
+  { 
+    if($i == 0)
+    $sql.= "AND ((:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
+    else
+    $sql.= " OR (:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
 
-  if($i == $countKeywords-1)
-  $sql.=")";
-}
-$sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
+    if($i == $countKeywords-1)
+    $sql.=")";
+  }
+  $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
 
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
@@ -317,12 +396,16 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
     for ($i=0; $i <  $countKeywords; $i++) { 
       $ps->bindParam(':KEYWORD'.$i, $motsClesSelect[$i], PDO::PARAM_INT); 
     }
-
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
 
@@ -337,13 +420,14 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
  */
 function GetAnnoncesFromSearchAnnonceur($recherche, $motsClesSelect,$limit,$idUtilisateur)
 {
+  //Teste si des mots-clés ont été fournis, si oui, affecte le compte de mots-clés à la variable sinon affecte 0
   if(is_null($motsClesSelect))
   $countKeywords = 0;
   else
   $countKeywords = count($motsClesSelect);
 
+  //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
   static $ps = null;
-
   //Pour chaque paramètres, s'il est fournit => le teste, sinon, ne le teste pas ({PARAMÈTRE} IS NULL OR [CONDITION] = {PARAMÈTRE})
   $sql = "SELECT DISTINCT annonces.*
   FROM annonces 
@@ -353,40 +437,45 @@ function GetAnnoncesFromSearchAnnonceur($recherche, $motsClesSelect,$limit,$idUt
   OR description LIKE :RECHERCHE)  
   AND (:IDUTILISATEUR IS NULL OR utilisateurs_id = :IDUTILISATEUR)";
 
-for ($i=0; $i < $countKeywords; $i++) 
-{ 
-  if($i == 0)
-  $sql.= "AND ((:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
-  else
-  $sql.= " OR (:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
+  //Va ajouter autant de test qu'il y a de mots-clés à la requête
+  for ($i=0; $i < $countKeywords; $i++) 
+  { 
+    if($i == 0)
+    $sql.= "AND ((:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
+    else
+    $sql.= " OR (:KEYWORD".$i." IS NULL OR keywords_id = :KEYWORD".$i.")";
 
-  if($i == $countKeywords-1)
-  $sql.=")";
-}
-$sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
+    if($i == $countKeywords-1)
+    $sql.=")";
+  }
+  $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
 
-
+  //Si le prepare statement n'a pas été instancié avant, il sera null et donc aura besoin d'être préparé à nouveau
   if ($ps == null) {
     $ps = db()->prepare($sql);
   }
   $answer = false;
   try {
+    //Affecte tous les paramètres avec la variable correspondante
     $ps->bindValue(':RECHERCHE', "%" . $recherche . "%", PDO::PARAM_STR);
     $ps->bindParam(':IDUTILISATEUR', $idUtilisateur, PDO::PARAM_INT);
     $ps->bindParam(':LIMIT',$limit,PDO::PARAM_INT);
+    //Affecte les paramètres de mots-clés autant fois qu'il y a de mots-clés de fournit
     for ($i=0; $i <  $countKeywords; $i++) { 
       $ps->bindParam(':KEYWORD'.$i, $motsClesSelect[$i], PDO::PARAM_INT); 
     }
-
+    //Si la requête réussi sans soucis, fetch tous les résultats dans $answer
     if ($ps->execute())
       $answer = $ps->fetchAll(PDO::FETCH_NUM);
-  } catch (PDOException $e) {
+  } 
+  //Si une exception survient, echo le message d'erreur
+  catch (PDOException $e) 
+  {
     echo $e->getMessage();
   }
+  //Renvoie le résultat de la requête une fois terminé
   return $answer;
 }
-
-
 
 // PHP
 // ==========================================================================================================
@@ -399,22 +488,27 @@ $sql.="  ORDER BY date_publication DESC LIMIT :LIMIT";
  */
 function ShowSelectKeywords($motsClesSelectPost)
 {
-  if(!isset($motsClesSelectPost))
+  //Si aucun mot-clé n'est fournit, définit la variable comme un array vide
+  if(is_null($motsClesSelectPost))
   $motsClesSelectPost = [];
 
+  //Récupère tous les mots-clés
   $keywords= GetKeywords();
+  //Affecte à la variable tout le contenu HTML voulu
   $select="";
   $select.= "<div class=\"row-fluid\">";
   $select.=	"<select id=\"motsClesSelect\" name=\"motsClesSelect[]\" multiple class=\"selectpicker\" data-show-subtext=\"true\" data-live-search=\"true\">";
+  //Pour chaque mots-clés, l'affiche dans le select
   foreach($keywords as $keyword)
-{
-  if(in_array($keyword[0],$motsClesSelectPost))
-  $select.="<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
-  else
-  $select.="<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
-}
+  {
+    if(in_array($keyword[0],$motsClesSelectPost))
+    $select.="<option selected value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+    else
+    $select.="<option value=\"".$keyword[0]."\">".$keyword[1]."</option>";
+  }
   $select.=			"</select>";
   $select.=			"</div>";
+  //Echo le contenu HTML du select multiple
   echo $select;
 }
 /**
@@ -427,25 +521,32 @@ function ShowSelectKeywords($motsClesSelectPost)
  */
 function ShowAnnoncesChercheur($recherche,$motsClesSelectPost,$limit)
 {
+  //Récupère toutes les annonces résultant de la recherche du chercheur
   $annonces = GetAnnoncesFromSearchChercheur($recherche,$motsClesSelectPost,$limit);
-	if($annonces != false)
-	foreach($annonces as $annonce)
-	{
-		$affichageAnnonce = "";
-		$affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
-		$affichageAnnonce .= "	<div class=\"row\">";
-		$affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
-		$affichageAnnonce .= "			<div class=\"company-content\">";
-		$affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
-		$affichageAnnonce .= "				<p><span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
-		$affichageAnnonce .= "			</div>";
-		$affichageAnnonce .= "		</div>";
-		$affichageAnnonce .= "	</div>";
-		$affichageAnnonce .= "</div></a>";
-		echo $affichageAnnonce; 
-	}
+  $affichageAnnonce = "";
+  //S'assure que des annonces ont bien été trouvées
+	if(!empty($annonces))
+  {
+    //Affiche chaque annonces à l'aide d'un echo
+    foreach($annonces as $annonce)
+    {
+      $affichageAnnonce .="<a href=\"annonce.php?idA=".$annonce[0]."\"><div class=\"company-list\">";
+      $affichageAnnonce .= "	<div class=\"row\">";
+      $affichageAnnonce .= "		<div class=\"col-md-10 col-sm-10\">";
+      $affichageAnnonce .= "			<div class=\"company-content\">";
+      $affichageAnnonce .= "				<h3>".$annonce[4]."</h3>";
+      $affichageAnnonce .= "				<p><span class=\"package\"><i class=\"fa fa-clock-o\"></i>".$annonce[3]."</span></p>";
+      $affichageAnnonce .= "			</div>";
+      $affichageAnnonce .= "		</div>";
+      $affichageAnnonce .= "	</div>";
+      $affichageAnnonce .= "</div></a>"; 
+    }
+  }
+  //Sinon affiche un message
+  else
+    $affichageAnnonce.="<p style=\"text-align:center;\">Aucune annonce ne correspond aux paramètres de recherche</p>";
+    echo $affichageAnnonce; 
 }
-
 
 /**
  * Permet d'afficher les annonces étant le résultat d'une recherche d'un Annonceur
@@ -458,12 +559,16 @@ function ShowAnnoncesChercheur($recherche,$motsClesSelectPost,$limit)
  */
 function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisateur)
 {
+  //Récupère toutes les annonces résultant de la recherche de l'annonceur
   $annonces = GetAnnoncesFromSearchAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisateur);
   $affichageAnnonce = "";
+  //S'assure que des annonces ont bien été trouvées
 	if(!empty($annonces))
   {
+    //Affiche chaque annonces à l'aide d'un echo
     foreach($annonces as $annonce)
     {
+      //Récupère tous les mots-clés et les followers de l'annonce
       $keywords = GetKeywordsByIdAnnonce($annonce[0]);
       $followers = GetFollowersByIdAnnonce($annonce[0]);
       
@@ -480,6 +585,7 @@ function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisat
       $affichageAnnonce.= "<a style=\"color:red\" id=\"supprimerAnnonce\" href=\"supprimer-annonce.php?idA=".$annonce[0]."&idU=".$idUtilisateur."\"> Supprimer </a>";                
       $affichageAnnonce.="</p>";
       $affichageAnnonce.= "<p><span>Mots-clés : ";
+      //Affiche les mots-clés s'il y en a
       if(!empty($keywords))
       {
         for ($i=0; $i < count($keywords); $i++) {
@@ -491,6 +597,7 @@ function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisat
       }
       $affichageAnnonce .="</span>";
       $affichageAnnonce .= "<span>Nombre de followers : ";
+      //Affiche les followers s'il y en a
       if(!empty($followers))
       $affichageAnnonce .= count($followers);
       else
@@ -503,6 +610,7 @@ function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisat
       
     }
   }
+  //Sinon affiche un message
   else
   $affichageAnnonce.="<p style=\"text-align:center;\">Vous n'avez pas d'annonces, créez-en !</p>";
 	echo $affichageAnnonce; 
@@ -516,11 +624,14 @@ function ShowAnnoncesAnnonceur($recherche,$motsClesSelectPost,$limit,$idUtilisat
  */
 function ShowAnnonceInfo($typeUser,$idAnnonce)
 {
+  //Récupère toutes les infos de l'annonce en question
   $annonceInfo = GetAnnonceInfo($idAnnonce);
 
   $annonce = "";
+  //Affiche la vue d'infos d'annonce pour l'annonceur
   if($typeUser =="Annonceur")
   {    
+    //Récupère tous les followers de l'annonce
     $followers = GetFollowersByIdAnnonce($annonceInfo[0]);
     $annonce.= "<section class=\"profile-detail\">";
     $annonce.=    "<div class=\"container\">";
@@ -531,6 +642,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=              "<div class=\"profile-content\">";
     $annonce.=                "<h2>".$annonceInfo[4]."</h2>";
     $annonce.=                "<p>Nombre de followers : ";
+    //Affiche les followers de l'annonce s'il y en a
     if(!empty($followers))
     $annonce.= count($followers);
     else
@@ -547,6 +659,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     }
     else
     $annonce.=                "<li><b>Vous n'avez pas de followers sur cette annonce</b></li>";
+
     $annonce.=                "</ul>";
     $annonce.=              "</div>";
     $annonce.=              "</br>";
@@ -560,6 +673,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=              "</div>";
     $annonce.=              "<div class=\"panel panel-default\">";
   
+    //Affiche le média de l'annonce s'il y en a un
     if(!empty($annonceInfo[8]))
     {  
       $annonce.= "<table style=\"text-align: center;margin: auto\">";
@@ -588,6 +702,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=      "</div>";
     $annonce.= "</section>";
   }
+  //Affiche la vue d'infos d'annonce pour le chercheur
   else if($typeUser == "Chercheur")
   {
     $annonce.= "<section class=\"profile-detail\">";
@@ -606,6 +721,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=                "</div>";                       
     $annonce.=                "<div class=\"panel-body\">";
     $annonce.=                  "<p>".$annonceInfo[5]."</p>	";
+    //Affihe un bouton pour ajouter l'annonce à la wishlist de l'utilisateur s'il ne l'a pas déjà fait
     if(!HasUserAddedAnnonceToWishlist($annonceInfo[0],GetUserId()))
     {
       $annonce.=                   "<form action=\"annonce.php?idA=".$annonceInfo[0]."\" method=\"POST\" >";
@@ -615,6 +731,7 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=                "</div>";
     $annonce.=              "</div>";
     $annonce.=              "<div class=\"panel panel-default\">";
+    //Affiche le média de l'annonce s'il y en a un
     if(!empty($annonceInfo[8]))
     {  
       $annonce.= "<table style=\"text-align: center;margin: auto\">";
@@ -643,5 +760,47 @@ function ShowAnnonceInfo($typeUser,$idAnnonce)
     $annonce.=      "</div>";
     $annonce.= "</section>";
   }
+  //Echo le contenu HTML de l'annonce
   echo $annonce;
+}
+
+function CheckMedia()
+{
+  if(isset($_FILES["media"]))
+  {
+    //Si un fichier est fournit (Image ou PDF)
+    if($_FILES["media"]['error'] == 0)
+    {
+      //Si le fichier fourni est plus petit que 20Mo
+      if($_FILES["media"]["size"]<=20000000)
+      {
+        $filename = uniqid();
+        $dir = "./tmp/";
+        $type = explode("/",$_FILES["media"]["type"])[1];
+
+        if(!in_array($type,["png","bmp","jpg","jpeg","pdf"]))
+        {		
+          SetAlert("error",8); 
+        }
+      }
+    }
+    else
+    {
+      $type = null;
+      $dir = null;
+      $filename = null;
+    }
+  }
+
+  return ([$dir,$filename,$type]);
+}
+
+function UploadMedia($dir,$filename,$type)
+{
+  //Si l'upload de l'image réussi, redirige vers la page mes annonces, sinon affiche une erreur
+  if(move_uploaded_file($_FILES["media"]["tmp_name"],$dir.$filename.".".$type)) 
+    return true; 
+  else
+    return false;
+  
 }

@@ -4,17 +4,17 @@ require_once './php/nav.inc.php';
 if(!isset($_SESSION))
 session_start();
 
+//Définit la page actuelle pour la barre de navigation 
 SetCurrentPage(pathinfo(__FILE__,PATHINFO_FILENAME));
 
-if(isset($_GET['error']))
-SetAlert("error",$_GET['error']);
+
 ?>
 <!doctype html>
 <html class="no-js" lang="en">
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>Jober Desk | Responsive Job Portal Template</title>
+        <title>Index | Search & Find Job</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		
@@ -29,9 +29,10 @@ SetAlert("error",$_GET['error']);
 	
     <body>
 	
-		<?php ShowNavBar(); ?>
 		<?php 
-		ShowAlert()?>
+		ShowNavBar(); 
+		ShowAlert();
+		?>
 	
 				<!-- Inner Banner -->
 				<section class="inner-banner" style="background-color:#242c36 url(https://via.placeholder.com/1920x600)no-repeat;">

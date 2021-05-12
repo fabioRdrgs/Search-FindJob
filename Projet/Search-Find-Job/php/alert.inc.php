@@ -1,11 +1,22 @@
 <?php
+//Permet d'afficher l'erreur adéquate si une erreur a été envoyée en GET par une autre page
+if(isset($_GET['error']))
+SetAlert("error",$_GET['error']);
+/**
+ * Permet d'afficher les alertes 
+ *
+ * @return void Echo l'alerte avec le contenu HTML adéquat
+ */
 function ShowAlert()
 {
+    //S'assure que le type alerte est bien définit
     if(isset($_POST['alertType']))
     {
+        //Teste si le type d'alerte est "erreur" et que le numéro de l'alerte est définit
         if($_POST['alertType'] == "error" && isset($_POST['alertNumber']))
         {
                 $message = "";
+                //Choisit quel message sera affiché
                 switch ($_POST['alertNumber']) 
                 {
                     case 1:
@@ -59,14 +70,22 @@ function ShowAlert()
                     case 17:
                         $message = "Une erreur s'est produite lors de l'ajout des mots clés";
                         break;
+                    case 18:
+                        $message="Aucun média n'a été fournit";
+                        break;
+                    case 19:
+                        $message = "Une erreur s'est produite lors de la création de l'annonce";
+                        break;
                     default:
                         $message = "";
                         break;
                 }
+            //Créé l'alerte allant être affichée
             $message = "<div class=\"alert alert-danger\" role=\"alert\">" . $message . "</div>";
            
             
         }
+         //Teste si le type d'alerte est "succès" et que le numéro de l'alerte est définit
         else if($_POST['alertType'] == "success" && isset($_POST['alertNumber']))
         {
             $message = "";
@@ -82,17 +101,30 @@ function ShowAlert()
                             $message = "";
                             break;
                     }
+                //Créé l'alerte allant être affichée
                 $message = "<div class=\"alert alert-success\" role=\"alert\">" . $message . "</div>";
         }
+        //Affiche l'alerte
         echo $message;
     }    
 }
-
+/**
+ * Permet de définir quel type d'alerte l'on souhaite et quel message souhaité
+ *
+ * @param [type] $type
+ * @param [type] $number
+ * @return void
+ */
 function SetAlert($type,$number)
 {
     $_POST['alertNumber'] = $number;
     $_POST['alertType'] = $type;
 }
+/**
+ * Permet de récupérer l'alerte définie
+ *
+ * @return null/array Retourne null si le type ou le numéro n'est pas défini, sinon retourne un array contenant les 2 informations
+ */
 function GetAlert()
 {
     if(!isset($_POST['errormsg']) &&!isset($_POST['alertType']))
