@@ -14,6 +14,7 @@ $dateFin = filter_input(INPUT_POST,'dateFin',FILTER_SANITIZE_STRING);
 $motsClesSelectPost = filter_input(INPUT_POST,'motsClesSelect',FILTER_SANITIZE_NUMBER_INT,FILTER_REQUIRE_ARRAY);
 $supprimerMediaActuel = filter_input(INPUT_POST,'enleverMedia');
 
+//Récupère les informations de l'annonce à l'aide de son ID
 if(isset($_GET['idA']))
 {
 	$annonceInfoOld = GetAnnonceInfo($_GET['idA']);
