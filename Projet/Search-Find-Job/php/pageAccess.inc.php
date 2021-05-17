@@ -103,15 +103,19 @@ ChangeLoginState(false);
             die("Vous n'avez pas accès à cette page");
         }
         //Il ne pourra aller sur la page administration si le type de gestion n'est pas fournit en GET
-        if($script == "administration" && !isset($_GET['gestion']))
+        if($script == "administration" && !isset($_GET['gestion']) && in_array($_GET['gestion'],$gestionDisponibles))
         {
+           if(!isset($_GET['gestion']))
+           {
             header('location: index.php');
             die("Vous n'avez pas accès à cette page");
-        }
-        else if(!in_array($_GET['gestion'],$gestionDisponibles))
-        {
+           }
+           else
+           if(!in_array($_GET['gestion'],$gestionDisponibles))
+           {
             header('location: index.php');
             die("Vous n'avez pas accès à cette page");
+           }
         }
     }
     //Aucun utilisateur ne pourra aller sur la page annonce si l'id de l'annonce n'est pas fournit en GET
