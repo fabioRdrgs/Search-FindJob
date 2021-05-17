@@ -360,7 +360,7 @@ function ShowKeywordManagement()
     {
         $table.="   <tr>";
         $table.="       <th scope=\"row\"><input readonly name=\"idKeyword[]\" type=\"number\" value=\"".$keyword[0]."\"/></th>";
-        $table.="       <td scope=\"row\"><input type=\"text\" name=\"labelsKeywords[]\" value=\"".$keyword[1]."\"/></td>";
+        $table.="       <td scope=\"row\"><input required type=\"text\" name=\"labelsKeywords[]\" value=\"".$keyword[1]."\"/></td>";
         $table.="       <td scope=\"row\"><input type=\"checkbox\" class=\"form-control input-lg\" name=\"deleteCheckbox[]\" value=\"".$keyword[0]."\"/></td>";
         $table.="   </tr>";
     }      

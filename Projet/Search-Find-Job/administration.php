@@ -61,6 +61,16 @@ if(isset($_POST['updateChanges']))
         //S'assure que les labels et IDs ont été définis
         if(isset($motsClesLabelsPost) && isset($motsClesIdPost))
         {
+            //Teste si tous les labels possèdent quelque chose de rentré afin de ne pas avoir de labels vides
+            $emptyLabel = false;
+            foreach($motsClesLabelsPost as $label)
+            {
+                if(empty($label))
+                $emptyLabel = true;
+            }
+            if($emptyLabel)
+            SetAlert("error",6);
+            else 
             //Mets à jour les Mots-Clés, dans le cas échéant affiche une erreur
                 if(!UpdateKeywords($motsClesIdPost,$motsClesLabelsPost))
                 SetAlert("error",15);      
@@ -125,7 +135,7 @@ if(isset($_POST['updateChanges']))
                     //Change le message dépendant du type de gestion
                     if($_GET['gestion'] == "utilisateurs")
                     echo "<h2>Gestion d'Utilisateurs</h2>
-                    <p>Gérer les types et mots de passes des utilisateurs</p>";
+                    <p>Gérez les types et mots de passes des utilisateurs</p>";
                     else if($_GET['gestion'] == "motscles")
                     echo "<h2>Gestion des Mots-Clés</h2>
                     <p>Ajoutez, modifiez ou supprimez des mots clés</p>";

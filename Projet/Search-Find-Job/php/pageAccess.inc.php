@@ -3,6 +3,7 @@ require_once './php/user_func.inc.php';
 require_once './php/alert.inc.php';
 // Nom de la page chargée (sans l'extension)
 $script = basename($_SERVER['SCRIPT_NAME'], '.php');
+$gestionDisponibles = ["motscles","utilisateurs"];
 //S'assure que la session soit démarrée à chaque fois
 if(!isset($_SESSION))
 {
@@ -53,6 +54,23 @@ ChangeLoginState(false);
                 die("Vous n'avez pas accès à cette page");
             }
         }
+        if($script == "modifier-annonce")
+        {
+            if(!isset($_GET['idA']))
+            {
+                header('location: annonces.php?idU='.GetUserId().'&alert=error&num=20');
+                die("Vous n'avez pas accès à cette page");
+            }
+            else
+            {
+                $GetAnnonceInfo  = GetAnnonceInfo($_GET['idA']);
+                if(!isset($_GET['idA']) || !isset($_GET['idU']) || $_GET['idU'] != GetUserId() || $GetAnnonceInfo[9] != GetUserId())
+                {
+                    header('location: annonces.php?idU='.GetUserId().'&alert=error&num=7');
+                    die("Vous n'avez pas accès à cette page");
+                }
+            }
+        }
     }
     else
     //Si l'utilisateur est un chercheur
@@ -86,6 +104,11 @@ ChangeLoginState(false);
         }
         //Il ne pourra aller sur la page administration si le type de gestion n'est pas fournit en GET
         if($script == "administration" && !isset($_GET['gestion']))
+        {
+            header('location: index.php');
+            die("Vous n'avez pas accès à cette page");
+        }
+        else if(!in_array($_GET['gestion'],$gestionDisponibles))
         {
             header('location: index.php');
             die("Vous n'avez pas accès à cette page");
