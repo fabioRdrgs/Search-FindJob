@@ -372,7 +372,7 @@ function ShowKeywordManagement()
     $table.="<table id=\"tableAddKeywords\" class=\"table table-bordered table-striped mb-0\">";
     $table.="  <thead>";
     $table.="       <tr>";
-    $table.="           <th scope=\"col\">Ajouter des mots clés <button id=\"addLabel\" type=\"button\"/>+</button><button id=\"removeLabel\" type=\"button\"/>-</button></th>";
+    $table.="           <th scope=\"col\">Ajouter des mots-clés <button id=\"addLabel\" type=\"button\"/>+</button><button id=\"removeLabel\" type=\"button\"/>-</button></th>";
     $table.="       </tr>";    
     $table.="  </thead>";
     $table.="  <tbody id=\"LabelBody\">";
