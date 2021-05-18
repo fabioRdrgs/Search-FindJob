@@ -5,7 +5,7 @@ include_once 'wishlist_func.inc.php';
 // ==========================================================================================================
 
 /**
- * Permet de créer une annonce ainsi qu'ajouter les mots clés fournis à cette dernière
+ * Permet de créer une annonce ainsi qu'ajouter les mots-clés fournis à cette dernière
  *
  * @param string $nomAnnonce
  * @param string $description

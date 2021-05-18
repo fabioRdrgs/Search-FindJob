@@ -59,7 +59,7 @@ if(isset($_POST['update']))
 					//Mets à jour l'annonce et récupère le résultat de la requête
 					$updateAnnonceResult = UpdateAnnonce($_GET['idA'],$nomAnnonce,$description,$dateDebut,$dateFin,$motsClesSelectPost,$dir,$filename,$type,$supprimerMediaActuel);					
 					//Si la checkbox a été cochée pour supprimer le média actuel, supprime le média du serveur
-					if(!is_null($supprimerMediaActuel))		
+					if(!is_null($supprimerMediaActuel) || GetAlert()[1] != "error")		
 					unlink($annonceInfoOld[6].$annonceInfoOld[7].".".$annonceInfoOld[8]);
 					//Si la mise à jour a bien été effectuée et qu'aucun nouveau média n'a été fourni, procède à l'upload sur le serveur de l'image
 					if($updateAnnonceResult && !empty($dir) && !empty($filename) && !empty($type))
