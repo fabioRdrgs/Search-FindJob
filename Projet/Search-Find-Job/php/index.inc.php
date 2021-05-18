@@ -96,20 +96,20 @@ else
 {
     $features.=     "<div class=\"container\">";
         $features.=          "<div class=\"col-sd-4\">";
-        $features.="<a href=\"signup.php\">";
+        $features.="<a href=\"login.php\">";
         $features.= 				"<div class=\"features-content\">";
-        $features.= 				 "<span class=\"box1\"><span aria-hidden=\"true\" class=\"glyphicon glyphicon-edit\"></span></span>";
-        $features.= 				 "<h3>Créer un compte</h3>";
+        $features.= 				 "<span class=\"box1\"><span aria-hidden=\"true\" class=\"glyphicon glyphicon-log-in\"></span></span>";
+        $features.= 				 "<h3>Se connecter</h3>";
         $features.=             "</div>";
         $features.="</a>";
         $features.= 	    "</div>";							
         $features.=     "</div>"; 
         $features.=     "<div class=\"container\">";
         $features.=          "<div class=\"col-sd-4\">";
-        $features.="<a href=\"login.php\">";
+        $features.="<a href=\"signup.php\">";
         $features.= 				"<div class=\"features-content\">";
-        $features.= 				 "<span class=\"box1\"><span aria-hidden=\"true\" class=\"glyphicon glyphicon-log-in\"></span></span>";
-        $features.= 				 "<h3>Se connecter</h3>";
+        $features.= 				 "<span class=\"box1\"><span aria-hidden=\"true\" class=\"glyphicon glyphicon-edit\"></span></span>";
+        $features.= 				 "<h3>Créer un compte</h3>";
         $features.=             "</div>";
         $features.="</a>";
         $features.= 	    "</div>";							
