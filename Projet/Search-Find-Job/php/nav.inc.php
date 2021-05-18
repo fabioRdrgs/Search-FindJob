@@ -92,7 +92,7 @@ function ShowNavBar()
                 $navBar.="</li>";
                 $navBar.="<li ";
                 if(isset($_GET['gestion']) && $_GET['gestion'] == "motscles") $navBar .= SetActivePage("administration"); $navBar .= ">
-                                <a href=\"administration.php?gestion=motscles\">Gérer les mots clés</a>
+                                <a href=\"administration.php?gestion=motscles\">Gérer les mots-clés</a>
                                 </li>";
                 break;
         }

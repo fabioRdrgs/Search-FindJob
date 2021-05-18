@@ -80,7 +80,7 @@ if(isset($_POST['plusAnnonces']))
 								</li>
 
 								<li>
-								<label for="motsClesSelect"> Mots Clés</label>
+								<label for="motsClesSelect"> Mots-Clés</label>
 									<?php ShowSelectKeywords($motsClesSelectPost);?>
 								</li>
 								<li>
