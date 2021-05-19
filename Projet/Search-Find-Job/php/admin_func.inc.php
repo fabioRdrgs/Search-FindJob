@@ -218,7 +218,7 @@ function UpdateUsers($idUtilisateurArray,$typeArray,$passwordArray)
  * @param array $idArray
  * @return bool Retourne Vrai si tous les IDs fournis sont bien présent dans la base, sinon retourne false
  */
-function IsEveryGivenIndexInDB($idArray)
+function IsEveryGivenUserIndexInDB($idArray)
 {
     //Déclaration du prepare statement en null s'il n'a pas déjà été instancié avant
     static $ps = null;

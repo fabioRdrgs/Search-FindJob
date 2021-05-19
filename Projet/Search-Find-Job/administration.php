@@ -35,7 +35,7 @@ if(isset($_POST['updateChanges']))
     if($_GET['gestion'] == "utilisateurs")
     {
         //Teste si tous les ID existent dans la base de donnée, dans le cas échéant affiche une erreur
-        if(IsEveryGivenIndexInDB($idsUtilisateur))
+        if(IsEveryGivenUserIndexInDB($idsUtilisateur))
         {
             //Teste si tous les types existent dans la BDD, dans le cas échéant affiche une erreur
             if(IsEveryGivenTypeInDB($typesUtilisateur))
@@ -82,10 +82,10 @@ if(isset($_POST['updateChanges']))
             if(!AddKeywords($newMotsClesPost))
              SetAlert("error",17);
         }
-        //S'assure que des mots clés ont été sélectionnés pour être supprimés
+        //S'assure que des mots-clés ont été sélectionnés pour être supprimés
         if(isset($deleteKeywordCheckboxPost))
         {      
-            //Va supprimer les mots clés fournis,, dans le cas échéant affiche une erreur
+            //Va supprimer les mots-clés fournis,, dans le cas échéant affiche une erreur
             if(!DeleteKeywords($deleteKeywordCheckboxPost))   
              SetAlert("error",16);     
         }
@@ -138,7 +138,7 @@ if(isset($_POST['updateChanges']))
                     <p>Gérez les types et mots de passes des utilisateurs</p>";
                     else if($_GET['gestion'] == "motscles")
                     echo "<h2>Gestion des Mots-Clés</h2>
-                    <p>Ajoutez, modifiez ou supprimez des mots clés</p>";
+                    <p>Ajoutez, modifiez ou supprimez des mots-clés</p>";
                 }?>
 			</div>
 			<div class="companies">
