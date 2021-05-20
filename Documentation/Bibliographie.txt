@@ -1,0 +1,7 @@
+Select live search : https://codepen.io/Rio517/pen/NPLbpP
+Confirmation dialog : https://www.geeksforgeeks.org/how-to-display-confirmation-dialog-when-clicking-an-a-link-using-javascript-jquery/
+Download on click : https://www.w3schools.com/tags/att_a_download.asp
+Download Arrow : https://www.picpng.com/download-arrow-down-icon-green-png-63838
+Template : https://themewagon.com/themes/free-bootstrap-html5-job-board-template-jober-desk/ OU https://github.com/technext/jober-desk/archive/master.zip
+Test différences Array : 
+https://stackoverflow.com/questions/16356138/compare-two-array-and-get-all-differences
