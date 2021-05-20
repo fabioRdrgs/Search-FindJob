@@ -91,16 +91,20 @@ function ShowNavBar()
                 $navBar.="<a href=\"administration.php?gestion=utilisateurs\">Gérer les utilisateurs</a>";
                 $navBar.="</li>";
                 $navBar.="<li ";
-                if(isset($_GET['gestion']) && $_GET['gestion'] == "motscles") $navBar .= SetActivePage("administration"); $navBar .= ">
-                                <a href=\"administration.php?gestion=motscles\">Gérer les mots-clés</a>
-                                </li>";
+                if(isset($_GET['gestion']) && $_GET['gestion'] == "motscles") $navBar .= SetActivePage("administration"); 
+                $navBar .= ">";
+                $navBar.="<a href=\"administration.php?gestion=motscles\">Gérer les mots-clés</a>";
+                $navBar.=" </li>";
                 break;
         }
+       
         $navBar .= "</ul>";
         $navBar.="<ul class=\"nav navbar-nav navbar-right\" data-in=\"fadeInDown\" data-out=\"fadeOutUp\">";           	
         $navBar.="<li><a href=\"logout.php\">Se déconnecter</a></li>";
     }
-
+    $navBar .= "<li ".SetActivePage("faq").">";
+    $navBar .= "<a href=\"faq.php\">Aide</a>";
+    $navBar.=  "</li>";
     $navBar .= "</ul>";
     $navBar.="</div>";
     $navBar.= "</div>" ;

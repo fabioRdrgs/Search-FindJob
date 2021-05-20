@@ -103,7 +103,7 @@ ChangeLoginState(false);
             die("Vous n'avez pas accès à cette page");
         }
         //Il ne pourra aller sur la page administration si le type de gestion n'est pas fournit en GET
-        if($script == "administration" && !isset($_GET['gestion']) && in_array($_GET['gestion'],$gestionDisponibles))
+        if($script == "administration")
         {
            if(!isset($_GET['gestion']))
            {
